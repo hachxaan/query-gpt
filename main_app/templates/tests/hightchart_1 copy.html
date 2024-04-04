@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Gráfica Highcharts</title>
+    <!-- Agrega los archivos de Highcharts, asegúrate de que las rutas sean correctas -->
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/data.js"></script>
+</head>
+<body>
+    <div id="container" style="width: 600px; height: 400px;"></div>
+
+    <script>
+        // Datos en formato JavaScript
+        var data = [
+            ["white_label_tag", "total_credit", "total_fee"],
+            ["abacus", 5939, 36.0],
+            ["assethr", 4549, 30.0],
+            ["test", 1230, 24.0],
+            ["insperity", 13841, 160.5],
+            ["pasaporte-migrante", 1973, 19.5],
+            ["", 66357.95, 924.0],
+            ["payplus", 205, 7.5],
+            ["kazpay", 7116, 36.0]
+        ];
+
+        // Crear la gráfica de barras
+        Highcharts.chart('container', {
+            chart: {
+                type: 'bar'
+            },
+            title: {
+                text: 'Gráfica de Barras'
+            },
+            xAxis: {
+                categories: data.slice(1).map(row => row[0])
+            },
+            yAxis: {
+                title: {
+                    text: 'Valores'
+                }
+            },
+            series: [{
+                name: 'Total Credit',
+                data: data.slice(1).map(row => row[1])
+            }, {
+                name: 'Total Fee',
+                data: data.slice(1).map(row => row[2])
+            }]
+        });
+    </script>
+</body>
+</html>

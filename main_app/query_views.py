@@ -1,10 +1,17 @@
 import json
 from django.shortcuts import render, redirect
-from .models import AllowedField, AllowedTable, Query
+from .models import AllowedField, AllowedTable, Query, process
 from .forms import QueryForm
 from marketing_queries.settings import openai_adapter_get_query
+from marketing_queries.settings import openai_adapter_get_context
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+import random
+import string
+from django.db import connections
+import csv
+import os
+from django.conf import settings
 
 replacements = {
     'email': '_email',
@@ -17,6 +24,91 @@ replacements = {
     'payroll_hourly': '_payroll_hourly',
     'payroll_salary': '_payroll_salary'
 }
+
+import csv
+import os
+from django.conf import settings
+
+def execute_query(query, query_id):
+    try:
+        with connections["platform_db"].cursor() as cursor:
+            cursor.execute(query)
+            results = cursor.fetchall()
+            
+            # Obtener los nombres de las columnas del cursor
+            field_names = [col[0] for col in cursor.description]
+            
+            # Desencriptar ciertos campos
+            decrypted_results = []
+            for row in results:
+                decrypted_row = []
+                for idx, item in enumerate(row):
+                    if field_names[idx] in ["_email", "_last_name", "_birthdate", "_street_address", "_address_line_2", "_mobile_phone", "_payroll_daily", "_payroll_hourly", "_payroll_salary"]:
+                        if isinstance(item, memoryview):
+                            decrypted_item = query.decrypt(item.tobytes()) if item else None
+                            decrypted_row.append(decrypted_item)
+                        else:
+                            decrypted_row.append(item)
+                    else:
+                        decrypted_row.append(item)
+                decrypted_results.append(tuple(decrypted_row))
+
+            # Definir la ruta del archivo
+            file_path = os.path.join(settings.BASE_DIR, "main_app", "static", "data", f"{query_id}.csv")
+            
+            # Guardar los resultados desencriptados en un archivo CSV
+            with open(file_path, "w", newline='', encoding='utf-8') as csvfile:
+                writer = csv.writer(csvfile)
+                writer.writerow(field_names)  # Escribir nombres de las columnas
+                for row in decrypted_results:
+                    writer.writerow(row)
+
+        return JsonResponse(decrypted_results, safe=False)
+    except Query.DoesNotExist:
+        return JsonResponse({"error": "Query not found."}, status=404)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+data = [
+    {"id": i, "nombre": ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))}
+    for i in range(100)  # 100 Filas de datos de ejemplo
+]
+
+def fetch_data(request):
+    draw = int(request.GET.get('draw', 1))
+    start = int(request.GET.get('start', 0))
+    length = int(request.GET.get('length', 10))
+    
+    filtered_data = data[start:start + length]
+    response = {
+        'draw': draw,
+        'recordsTotal': len(data),
+        'recordsFiltered': len(data),
+        'data': filtered_data,
+    }
+    return JsonResponse(response)
+
+def table_old(request):
+    return render(request, 'datatables_base.html')
+
+
+def table(request):
+    proc = process.objects.first()
+    chat_history = proc.get_chat_history() if proc else []
+
+    return render(request, 'datatables_base.html', {'chat_history': chat_history})
+
+def chart(request):
+    data = [1, 3, 2, 4]  # Datos de ejemplo para el gráfico
+    return render(request, 'tests/hightchart_1.html', {'data': data})
+
+
+
+def chat_database(request):
+    data = [1, 3, 2, 4]  # Datos de ejemplo para el gráfico
+    return render(request, 'chat_database.html', {'data': data})
+
 
 def get_tables_fields():
     # Obtiene todas las tablas permitidas
@@ -38,6 +130,80 @@ def get_tables_fields():
 
     return tables_fields
 
+def validate_and_extract(s):
+    # Si el string contiene ":\n" lo eliminamos
+    if ":\n" in s:
+        s = s.split(":\n", 1)[1]
+
+    # Verificamos si el string restante es un JSON válido
+    try:
+        json.loads(s)
+        return s
+    except json.JSONDecodeError:
+        return None
+
+@csrf_exempt
+def config_report(request):
+    try:
+        if request.method == 'POST':
+            data = json.loads(request.body)  # Parse the request body
+            requestText = data.get('prompt', '')  # Get the 'request' field
+            try:
+                message_json = {
+                    "sender": "Carlos",
+                    "text": requestText,
+                    "request_type": None,
+                }
+                process_instance = process.get_or_create_by_id(id=1, **message_json)  # Obtener una instancia del modelo
+
+                process_instance.add_formatted_message_to_chat_history(message_j/managerson)
+
+                get_request_type = openai_adapter_get_context.get_context(
+                    user_prompt=requestText
+                )
+
+
+                # if get_request_type.get('request_type') = [1,2]: # Query
+                # return JsonResponse(json.dumps(get_request_type))
+                respuesta = validate_and_extract(get_request_type)
+
+                respuesta = json.loads(respuesta)
+
+                respuesta['query'] = None
+                if int(respuesta.get('request_type')) in [1, 2]:
+                    tables_fields = get_tables_fields()
+                    response = openai_adapter_get_query.get_query(tables_fields, requestText)
+
+                    query = response.get('query')
+                    respuesta['query']= query
+                    # execute_query(query, 'datos')
+                
+                process_instance = process.objects.get(id=1)  # Obtener una instancia del modelo
+                message_json = {
+                    "sender": "GPT",
+                    # "text": f"{respuesta.get} respuesta.get('respueta_chat'),
+                    "request_type": respuesta.get('request_type'),
+                    "query": respuesta['query']
+                }
+                process_instance.add_formatted_message_to_chat_history(message_json)
+
+                
+                return JsonResponse(respuesta)
+            
+            except Exception as e:
+                return JsonResponse({"error": str(e)}, status=500)
+
+        else:
+            return JsonResponse({"error": "Invalid request method."}, status=400)
+
+    except Query.DoesNotExist:
+        return JsonResponse({"error": "Query not found."}, status=404)
+    except ValueError as e:
+        return JsonResponse({"error": str(e)}, status=400)
+    except Exception as e:
+        return JsonResponse({"error": "An unexpected error occurred: " + str(e)}, status=500)
+
+
 @csrf_exempt
 def get_query_from_gpt(request):
     try:
@@ -51,8 +217,15 @@ def get_query_from_gpt(request):
             
             try:
                 response = openai_adapter_get_query.get_query(tables_fields, requestText)
-                return JsonResponse({"sql": response})
+                print(type(response))
+                print(response)
+
+                print(type(response['query']))
+                print(response['query'])
+
+                return JsonResponse({"sql": response['query'], "fields": response['field_info'  ]})
             except Exception as e:
+                print(str(e))
                 return JsonResponse({"error": str(e)}, status=500)
 
         else:
@@ -68,7 +241,11 @@ def get_query_from_gpt(request):
 @csrf_exempt
 def query_list(request):
     queries = Query.objects.all()
-    return render(request, 'queries/list.html', {'queries': queries})
+    current_path = request.path
+    return render(request, 'queries/list.html', {
+        'queries': queries,
+        'current_path': current_path  # Añadir la ruta actual al contexto
+    })
 
 @csrf_exempt
 def query_detail(request, query_id):
@@ -105,3 +282,8 @@ def query_delete(request, query_id):
         query.delete()
         return redirect('query_list')
     return render(request, 'queries/confirm_delete.html', {'object': query})
+
+
+"""
+SELECT u.id, u.first_name, u._email, u._birthdate, u.registration_date, u.last_login_date, u.mobile_phone, u.state, u.company_id, u.payroll_frequency, u.payroll_last_date, u.signup_date, u.inactive, u.terms_conditions, u.promotional_sms, u.promotional_email, u._street_address, u._address_line_2, u._payroll_daily, u._payroll_hourly, u._payroll_salary, u.payroll_type, u.city, u.zip_code, u.promotional_code, u.payroll_active, u._last_name FROM users u JOIN companies c ON u.company_id = c.id WHERE u.inactive = true AND c.white_label_tag = 'insperity'
+"""

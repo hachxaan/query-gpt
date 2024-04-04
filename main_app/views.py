@@ -6,13 +6,25 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from .models import Query
 
+import re
+import datetime
+
 # from django.core.exceptions import ObjectDoesNotExist
 
 
-def home(request):
+def query_list_download(request):
     # return render(request, "queries.html")
     queries = Query.objects.all()
-    return render(request, 'queries.html', {'queries': queries, 'user': request.user})
+    current_path = request.path
+    return render(request, 'queries/queries.html', {'queries': queries, 'user': request.user, 'current_path': current_path})
+
+
+@login_required
+def home(request):
+    # return render(request, "queries.html")
+    # queries = Query.objects.all()
+    current_path = request.path
+    return render(request, 'home.html', {'current_path': current_path, 'user': request.user})
 
 
 @login_required
@@ -29,9 +41,6 @@ def execute_query(request, query_id):
         return JsonResponse({"error": str(e)}, status=500)
 
 
-import re
-import datetime
-
 @login_required
 def download_results(request, query_id):
     try:
@@ -47,11 +56,12 @@ def download_results(request, query_id):
             decrypted_row = []
             for idx, item in enumerate(row):
                 if field_names[idx] in ["_email", "_last_name", "_birthdate", "_street_address", "_address_line_2", "_mobile_phone", "_payroll_daily", "_payroll_hourly", "_payroll_salary"]:
-                    if isinstance(item, memoryview):
-                        decrypted_item = query.decrypt(item.tobytes()) if item else None
+                    if item is not None and isinstance(item, memoryview):
+                        decrypted_item = query.decrypt(item.tobytes())
                         decrypted_row.append(decrypted_item)
                     else:
-                        decrypted_row.append(item)
+                        decrypted_item = None
+                        decrypted_row.append(decrypted_item)
                 else:
                     decrypted_row.append(item)
             decrypted_results.append(tuple(decrypted_row))
@@ -69,6 +79,9 @@ def download_results(request, query_id):
 
         writer = csv.writer(response)
         writer.writerow(field_names)  # Write field names at the beginning
+
+        print(field_names)
+        print(decrypted_results)
         for row in decrypted_results:
             writer.writerow(row)
 

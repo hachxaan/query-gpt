@@ -77,6 +77,90 @@ class User(AbstractUser):
     )
 
 
+class process(models.Model):
+    id = models.AutoField(primary_key=True)
+    query = models.TextField()
+    table_template = models.TextField()
+    chart_template = models.TextField()
+    chat_history = models.JSONField()
+    javasctipt_code = models.TextField()
+
+    def add_formatted_message_to_chat_history(self, message_json):
+        """
+        Agrega un mensaje al historial de chat, formateando según el contenido del mensaje.
+        
+        :param message_json: Un diccionario que representa el mensaje.
+        """
+        # Inicializa el mensaje formateado
+        formatted_message = {   
+            "sender": message_json.get("sender", ""),
+            "text": message_json.get("text", "")
+        }
+        
+        # Si el mensaje tiene un request_type de 1 o 2 y contiene una clave 'query'
+        if message_json.get("request_type") in ["1", "2"] and "query" in message_json:
+            # Formatea el mensaje como un código
+            formatted_message["text"] = f"{message_json.get('text', '')}\nEsta es la consulta:\n<code>{message_json['query']}</code>"
+        
+        # Agrega el mensaje formateado al historial de chat
+        self.add_message_to_chat_history(formatted_message)
+
+    # Métodos get y set para query
+    def get_query(self):
+        return self.query
+    
+    def set_query(self, query):
+        self.query = query
+        self.save()
+
+    # Métodos get y set para table_template
+    def get_table_template(self):
+        return self.table_template
+    
+    def set_table_template(self, table_template):
+        self.table_template = table_template
+        self.save()
+
+    # Métodos get y set para chart_template
+    def get_chart_template(self):
+        return self.chart_template
+    
+    def set_chart_template(self, chart_template):
+        self.chart_template = chart_template
+        self.save() 
+    
+    # Métodos get y set para chat_history
+    def get_chat_history(self):
+        return self.chat_history
+    
+    def set_chat_history(self, chat_history):
+        self.chat_history = chat_history
+        self.save()
+    
+    # Métodos específicos para chat_history
+    def add_message_to_chat_history(self, message):
+        if self.chat_history is None:
+            self.chat_history = []
+        self.chat_history.append(message)
+        self.save()
+        
+    def get_last_message_from_chat_history(self):
+        return self.chat_history[-1] if self.chat_history else None
+    
+    @classmethod
+    def get_or_create_by_id(cls, id, **kwargs):
+        try:
+            # Intenta buscar el registro por id
+            instance = cls.objects.get(id=id)
+        except cls.DoesNotExist:
+            # Si no se encuentra el registro, se crea uno nuevo sin los argumentos adicionales
+            instance = cls.objects.create(id=id)
+            
+            # Usa los argumentos adicionales para agregar un mensaje al historial del chat
+            instance.add_formatted_message_to_chat_history(kwargs)
+            
+        return instance
+
 # Definición del modelo de consulta
 class Query(models.Model):
     id = models.AutoField(primary_key=True)
@@ -104,6 +188,8 @@ class Query(models.Model):
         return query
 
     def get_identifiers(self, tables, fields, query):
+        pattern = re.compile(r'concat\((.*?)\)', re.IGNORECASE | re.DOTALL)
+
         # Parsea la consulta
         parsed_query = sqlparse.parse(query)[0]
 
@@ -117,10 +203,28 @@ class Query(models.Model):
 
         from_seen = False
         for token in parsed_query.tokens:
+            # if token.value.upper() == 'CONCAT':
+            #     print(token)
             if not from_seen:
                 if token.ttype is None and isinstance(token, sqlparse.sql.IdentifierList):
                     for identifier in token.get_identifiers():
-                        if '.' in str(identifier):
+                        match = pattern.search(identifier.value)
+
+                        if match:
+                            # Extraer el grupo que contiene los nombres de los campos
+                            fields_string = match.group(1)
+                            # Limpiar y separar los nombres de campo basados en comas, excluyendo literales entre comillas
+                            raw_fields = [field.strip() for field in fields_string.split(',') if not field.strip().startswith(("'", '"'))]
+                            
+                            # Añadir nombres de campo al conjunto, eliminando posibles prefijos de tabla/alias
+                            for field in raw_fields:
+                                # Excluye las cadenas literales que puedan estar presentes
+                                if "'" not in field and '"' not in field:
+                                    field_name = field.split('.')[-1]  # Tomar solo el nombre del campo, ignorando alias de tabla
+                                    fields.add(field_name)
+
+
+                        elif '.' in str(identifier):
                             _, field = str(identifier).split('.')
                             fields.add(field)
                         else:
@@ -148,10 +252,10 @@ class Query(models.Model):
                         
                         if isinstance(token, sqlparse.sql.Parenthesis):
                             tables, fields = self.get_identifiers( tables, fields, str(token.value).strip('()') )
-                        else:
-                            if not isinstance(token, sqlparse.sql.Comparison) and not isinstance(token, sqlparse.sql.Where):
-                                for identifier in token.get_identifiers():
-                                    tables.add(str(identifier))
+                        # else:
+                        #     if not isinstance(token, sqlparse.sql.Comparison) and not isinstance(token, sqlparse.sql.Where):
+                        #         for identifier in token.get_identifiers():
+                        #             tables.add(str(identifier))
 
             else:
                 if token.ttype is sqlparse.tokens.Keyword and token.value.upper() == 'FROM':
@@ -192,7 +296,7 @@ class Query(models.Model):
                     exists = True
                     break
             if not exists:
-                raise ValueError("Field is not allowed")
+                raise ValueError(f"Field '{field}' is not allowed")
 
         return True
 

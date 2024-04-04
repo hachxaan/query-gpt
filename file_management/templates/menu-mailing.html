@@ -1,0 +1,12 @@
+<!-- Sidebar -->
+<div class="bg-light border-right" id="sidebar-wrapper">
+    <div class="sidebar-heading">Menú</div>
+    <div class="list-group list-group-flush">
+        <!-- Usar la variable current_path para aplicar la clase active -->
+        <a href="{% url 'home' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'home' %}active{% else %}bg-light{% endif %}" style="background-color: rgb(0, 164, 228); {% if request.resolver_match.url_name == 'home' %}border-color: rgb(0, 164, 228);{% endif %}">Home</a>
+        <a href="{% url 'mailing_campaign_list' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'mailing_campaign_list' %}active{% else %}bg-light{% endif %}" style="background-color: rgb(0, 164, 228); {% if request.resolver_match.url_name == 'mailing_campaign_list' %}border-color: rgb(0, 164, 228);{% endif %}">Campaings</a>
+        <a href="{% url 'mailing_factory_list' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'mailing_factory_list' %}active{% else %}bg-light{% endif %}" style="background-color: rgb(0, 164, 228); {% if request.resolver_match.url_name == 'mailing_factory_list' %}border-color: rgb(0, 164, 228);{% endif %}">Images</a>
+                <!-- Agrega más enlaces según sea necesario -->
+    </div>
+</div>
+<!-- /#sidebar-wrapper -->

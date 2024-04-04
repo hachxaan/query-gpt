@@ -1,0 +1,12 @@
+<!-- Sidebar -->
+<div class="bg-light border-right" id="sidebar-wrapper">
+    <div class="sidebar-heading">Menú</div>
+    <div class="list-group list-group-flush">
+        <!-- Usar la variable current_path para aplicar la clase active -->
+        <a href="{% url 'home' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'home' %}active{% else %}bg-light{% endif %}">Home</a>
+        <a href="{% url 'query_list_download' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'query_list_download' %}active{% else %}bg-light{% endif %}">Download Queries</a>
+        <a href="{% url 'query_list' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'query_list' %}active{% else %}bg-light{% endif %}">Queries Manager</a>
+                <!-- Agrega más enlaces según sea necesario -->
+    </div>
+</div>
+<!-- /#sidebar-wrapper -->

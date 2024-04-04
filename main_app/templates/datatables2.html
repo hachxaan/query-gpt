@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Chatbot UI</title>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.4/css/jquery.dataTables.css">
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+        }
+        #cnt-table {
+            position: absolute;
+            left: 0;
+            width: 80%;
+            height: 100%;
+            background-color: #fff;
+            overflow-y: auto;
+            padding: 20px;
+            box-sizing: border-box;
+            padding-top: 50px;
+        }
+        .chat-container {
+            position: fixed;
+            right: 0;
+            width: 20%;
+            height: 100%;
+            background-color: #f4f4f4;
+            border-left: 1px solid #ccc;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        .chat-input {
+            display: flex;
+            align-items: center;
+            padding: 5px 10px;
+            background-color: #fff;
+            border-top: 1px solid #ccc;
+        }
+        .chat-input input {
+            flex: 1;
+            border: none;
+            padding: 10px;
+            margin-right: 10px;
+        }
+        .chat-input button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        .chat-input button:hover {
+            background-color: #0056b3;
+        }
+        .message {
+            padding: 10px;
+            border-bottom: 1px solid #e1e1e1;
+        }
+        .message p {
+            margin: 0 0 10px;
+        }
+        .message code {
+            display: block;
+            white-space: pre-wrap;
+            background-color: #f9f9f9;
+            padding: 10px;
+            border: 1px solid #e1e1e1;
+            border-radius: 4px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        #data-table td {
+            border-bottom: 1px solid #e1e1e1; /* Línea fina divisoria */
+        }
+        #container {
+            height: 400px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<div id="cnt-table">
+    <table id="data-table">
+        <thead>
+        <tr>
+            <th>white_label_tag</th>
+            <th>Recurrent Solid Credit</th>
+            <th>Recurrent Tabapay Credit</th>
+            <th>Regular ACH Credit</th>
+            <th>Regular Solid Credit</th>
+            <th>Regular Tabapay Credit</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>abacus</td>
+            <td>30</td>
+            <td>42</td>
+            <td>11</td>
+            <td>24</td>
+            <td>10</td>
+        </tr>
+        <tr>
+            <td>multikrdcsv</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        <tr>
+            <td>assethr</td>
+            <td>56</td>
+            <td>26</td>
+            <td>8</td>
+            <td>20</td>
+            <td>11</td>
+        </tr>
+        <tr>
+            <td>test</td>
+            <td>50</td>
+            <td>0</td>
+            <td>0</td>
+            <td>16</td>
+            <td>3</td>
+        </tr>
+        <tr>
+            <td>insperity</td>
+            <td>92</td>
+            <td>55</td>
+            <td>31</td>
+            <td>113</td>
+            <td>36</td>
+        </tr>
+        <tr>
+            <td>pasaporte-migrante</td>
+            <td>0</td>
+            <td>50</td>
+            <td>4</td>
+            <td>13</td>
+            <td>4</td>
+        </tr>
+        <tr>
+            <td>payplus</td>
+            <td>0</td>
+            <td>5</td>
+            <td>0</td>
+            <td>5</td>
+            <td>5</td>
+        </tr>
+        <tr>
+            <td>kazpay</td>
+            <td>23</td>
+            <td>30</td>
+            <td>13</td>
+            <td>24</td>
+            <td>9</td>
+        </tr>
+        </tbody>
+    </table>  
+    <div id="container"></div>
+</div>
+<div class="chat-container">
+    <div class="chat-messages" id="chat-messages">
+        <div class="message">
+            <p><strong>Carlos:</strong> Se requiere saber por qué medio han sido otorgados los créditos en el último año,
+                agrupados por white label. Si no tiene white label no lo consideres. Poner la suma de los medios en
+                columnas.</p>
+        </div>
+        <div class="message">
+            <p><strong>Model:</strong> Esta es la consulta:</p>
+            <code>
+SELECT companies.white_label_tag, 
+SUM(CASE WHEN credits.type = 'Recurrent Solid Credit' THEN 1 ELSE 0 END) AS "Recurrent Solid Credit", 
+SUM(CASE WHEN credits.type = 'Recurrent Tabapay Credit' THEN 1 ELSE 0 END) AS "Recurrent Tabapay Credit", 
+SUM(CASE WHEN credits.type = 'Regular ACH Credit' THEN 1 ELSE 0 END) AS "Regular ACH Credit", 
+SUM(CASE WHEN credits.type = 'Regular Solid Credit' THEN 1 ELSE 0 END) AS "Regular Solid Credit", 
+SUM(CASE WHEN credits.type = 'Regular Tabapay Credit' THEN 1 ELSE 0 END) AS "Regular Tabapay Credit", 
+SUM(CASE WHEN credits.type = 'wage_access' THEN 1 ELSE 0 END) AS "wage_access"
+FROM users 
+INNER JOIN companies ON users.company_id = companies.id 
+INNER JOIN credits ON users.id = credits.user_id 
+WHERE companies.white_label_tag IS NOT NULL 
+AND credits.created > NOW() - INTERVAL '1 year' 
+GROUP BY companies.white_label_tag;
+            </code>
+        </div>
+    </div>
+    <div class="chat-input">
+        <input type="text" placeholder="Escribe tu mensaje..." id="chat-input">
+        <button type="submit" id="send-button">Enviar</button>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.js"></script>
+<script>
+    $(document).ready( function () {
+        $('#data-table').DataTable({
+            "bInfo" : true,
+            "paging": true,
+            "searching": true,
+            "ordering": true,
+            "order": [[0, 'asc']]
+        });
+
+        Highcharts.chart('container', {
+            chart: {
+                type: 'column'
+            },
+            title: {
+                text: 'Créditos otorgados en el último año agrupados por White Label'
+            },
+            xAxis: {
+                categories: ['abacus', 'multikrdcsv', 'assethr', 'test', 'insperity', 'pasaporte-migrante', 'payplus', 'kazpay']
+            },
+            yAxis: {
+                title: {
+                    text: 'Cantidad de Créditos'
+                }
+            },
+            series: [{
+                name: 'Recurrent Solid Credit',
+                data: [30, 0, 56, 50, 92, 0, 0, 23]
+            }, {
+                name: 'Recurrent Tabapay Credit',
+                data: [42, 0, 26, 0, 55, 50, 5, 30]
+            }, {
+                name: 'Regular ACH Credit',
+                data: [11, 0, 8, 0, 31, 4, 0, 13]
+            }, {
+                name: 'Regular Solid Credit',
+                data: [24, 0, 20, 16, 113, 13, 5, 24]
+            }, {
+                name: 'Regular Tabapay Credit',
+                data: [10, 0, 11, 3, 36, 4, 5, 9]
+            }]
+        });
+    });
+</script>
+</body>
+</html>

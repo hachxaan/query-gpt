@@ -3,21 +3,26 @@
 
 {% block content %}
 <!-- Begin Page Content -->
-<div class="container-fluid">
-
-    <!-- Page Heading -->
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+<div class="d-flex" id="wrapper">
+  <!-- Sidebar -->
+  {% include 'queries/menu-querys.html' %}
+  <!-- /#sidebar-wrapper -->
+  <!-- Page Content -->
+  <div id="page-content-wrapper">
+    <div class="container-fluid">
+      <!-- Page Heading -->
+      <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">Queries</h1>
         <a href="{% url 'query_create' %}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
-                class="fas fa-plus fa-sm text-white-50"></i> Add Query</a>
-    </div>
+            class="fas fa-plus fa-sm text-white-50"></i> Add Query</a>
+      </div>
 
-    <!-- Content Row -->
-    <div class="row">
+      <!-- Content Row -->
+      <div class="row">
 
-      <!-- DataTables Example -->
-      <div class="col-xl-12 col-lg-12">
-        <div class="card shadow mb-4">
+        <!-- DataTables Example -->
+        <div class="col-xl-12 col-lg-12">
+          <div class="card shadow mb-4">
             <div class="card-header py-3">
               <h6 class="m-0 font-weight-bold text-primary">List of Queries</h6>
             </div>
@@ -41,18 +46,16 @@
                       <td>{{ query.author }}</td>
                       <td>{{ query.created_date }}</td>
                       <td>
-                          <a href="{% url 'query_update' query.id %}" class="btn btn-info btn-icon-split">
-                            <span class="icon text-white-50">
-                              <i class="fas fa-edit"></i>
-                            </span>
-                            <span class="text">Edit</span>
-                          </a>
-                          <a href="{% url 'query_delete' query.id %}" class="btn btn-danger btn-icon-split">
-                            <span class="icon text-white-50">
-                              <i class="fas fa-trash"></i>
-                            </span>
-                            <span class="text">Delete</span>
-                          </a>
+                        <a href="{% url 'query_update' query.id %}" class="btn btn-info btn-icon-split">
+                          <span class="icon text-white-50">
+                            <i class="fas fa-edit"></i>
+                          </span>
+                        </a>
+                        <a href="{% url 'query_delete' query.id %}" class="btn btn-danger btn-icon-split">
+                          <span class="icon text-white-50">
+                            <i class="fas fa-trash"></i>
+                          </span>
+                        </a>
                       </td>
                     </tr>
                     {% endfor %}
@@ -61,9 +64,15 @@
               </div>
             </div>
           </div>
-      </div>
+        </div>
 
+      </div>
     </div>
+  </div>
+  <!-- /#page-content-wrapper -->
+
+
+
 </div>
 <!-- /.container-fluid -->
 {% endblock %}

@@ -14,7 +14,9 @@ from pathlib import Path
 import os
 
 from dotenv import load_dotenv
+from main_app.utils.adapters.openai_configure_table import OpenAIAPITableAdapter
 from main_app.utils.adapters.openai_create_query import OpenAIAPIQueryAdapter
+from main_app.utils.adapters.openai_get_context import OpenAIAPIGetContextAdapter
 
 from main_app.utils.adapters.openai_validation_query import (
     OpenAIAPIAdapter,
@@ -47,9 +49,15 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    'crispy_forms',
+    'crispy_bootstrap5',
     "main_app",
     "login_app",
+    "file_management",
+    "html_manager",
 ]
+
+
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
@@ -72,6 +80,10 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "marketing_queries.urls"
+
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
+CRISPY_TEMPLATE_PACK = 'bootstrap5'
 
 TEMPLATES = [
     {
@@ -117,6 +129,8 @@ DATABASES = {
 
 openai_adapter = OpenAIAPIAdapter(os.getenv("OPENAI_API_KEY"))
 openai_adapter_get_query = OpenAIAPIQueryAdapter(os.getenv("OPENAI_API_KEY"))
+openai_adapter_configure_table = OpenAIAPITableAdapter(os.getenv("OPENAI_API_KEY"))
+openai_adapter_get_context = OpenAIAPIGetContextAdapter(os.getenv("OPENAI_API_KEY"))
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators

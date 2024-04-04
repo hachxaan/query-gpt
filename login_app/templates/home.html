@@ -1,0 +1,48 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'artcode/css/home.css' %}">
+</head>
+
+<body>
+    <div class="px-4 grid gap-6 md:grid-cols-2 lg:gap-10 xl:grid-cols-4">
+        <div class="flex flex-col rounded-lg overflow-hidden">
+            <a class="flex-1" href="{% url 'query_list_download' %}" title="Query Builder">
+                <div class="rounded-lg border bg-card text-card-foreground shadow-sm flex flex-col h-full"
+                    data-v0-t="card">
+                    <div class="flex-1 p-6">
+                        <div class="space-y-2">
+                            <h3 class="text-lg font-semibold">Query Builder</h3>
+                            <p class="text-sm leading-none text-gray-500">
+                                Natural language query builder
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="flex flex-col rounded-lg overflow-hidden">
+            <a class="flex-1" href="{% url 'mailing_campaign_list' %}" title="Query Builder">
+                <div class="rounded-lg border bg-card text-card-foreground shadow-sm flex flex-col h-full"
+                    data-v0-t="card">
+                    <div class="flex-1 p-6">
+                        <div class="space-y-2">
+                            <h3 class="text-lg font-semibold">Campaing Manager</h3>
+                            <p class="text-sm leading-none text-gray-500">
+                                Create the HTML for the campaigns from a CSV file.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+</body>
+
+</html>
