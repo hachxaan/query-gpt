@@ -22,7 +22,34 @@ from main_app.utils.adapters.openai_validation_query import (
     OpenAIAPIAdapter,
 )
 
+from sshtunnel import SSHTunnelForwarder
+
+# import socks
+# import socket
+# socks.set_default_proxy(socks.SOCKS5, "localhost", 8080)
+# socket.socket = socks.socksocket
+
 load_dotenv()
+
+def create_db_tunnel():
+    server = SSHTunnelForwarder(
+        (os.getenv("SSH_SERVER"), int(os.getenv("SSH_PORT", "2221"))),  # La dirección del servidor SSH, por ejemplo, 'platform.multikrd.com'
+        ssh_username=os.getenv("SSH_USER"),  # Tu nombre de usuario en el servidor SSH
+        ssh_password=os.getenv("SSH_PASSWORD"),  # Tu contraseña o utiliza ssh_pkey con ssh_private_key_password si es necesario
+        remote_bind_address=(os.getenv("POSTGRES_DNS"), int(os.getenv("POSTGRES_PORT"))),  # La dirección y el puerto de la base de datos en el servidor remoto
+    )
+
+    server.start()
+
+    return {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("POSTGRES_DB"),
+        "USER": os.getenv("POSTGRES_USER"),
+        "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
+        "HOST": "127.0.0.1",  # localhost porque estamos haciendo un túnel a la base de datos
+        "PORT": server.local_bind_port,  # El puerto local asignado al túnel
+    }
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -117,14 +144,15 @@ DATABASES = {
         "HOST": os.getenv("POSTGRES_DNS_MKT"),
         "PORT": os.getenv("POSTGRES_PORT_MKT"),
     },
-    "platform_db": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv("POSTGRES_DB"),
-        "USER": os.getenv("POSTGRES_USER"),
-        "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
-        "HOST": os.getenv("POSTGRES_DNS"),
-        "PORT": os.getenv("POSTGRES_PORT"),
-    },
+    # "platform_db": {
+    #     "ENGINE": "django.db.backends.postgresql",
+    #     "NAME": os.getenv("POSTGRES_DB"),
+    #     "USER": os.getenv("POSTGRES_USER"),
+    #     "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
+    #     "HOST": os.getenv("POSTGRES_DNS"),
+    #     "PORT": os.getenv("POSTGRES_PORT"),
+    # },
+    "platform_db": create_db_tunnel(),
 }
 
 openai_adapter = OpenAIAPIAdapter(os.getenv("OPENAI_API_KEY"))
