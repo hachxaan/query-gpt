@@ -15,6 +15,7 @@ import datetime
 
 @login_required
 def download_results(request, query_id):
+    print(".................................. Download Results .................................. ")
     ssh_tunnel = None
     try:
         query = Query.objects.get(pk=query_id)
@@ -63,7 +64,7 @@ def download_results(request, query_id):
 
 def query_list_download(request):
     # return render(request, "queries.html")
-    print("Query list download")
+    print(".................................. Query List Download .................................. ")
     queries = Query.objects.all()
     current_path = request.path
     return render(request, 'queries/queries.html', {'queries': queries, 'user': request.user, 'current_path': current_path})
@@ -71,6 +72,7 @@ def query_list_download(request):
 
 @login_required
 def home(request):
+    print(".................................. Hom .................................. ")
     # return render(request, "queries.html")
     # queries = Query.objects.all()
     current_path = request.path
@@ -80,6 +82,7 @@ def home(request):
 @login_required
 def execute_query(request, query_id):
     try:
+        print(".................................. Execute Query .................................. ")
         query = Query.objects.get(pk=query_id)
         with connections["platform_db"].cursor() as cursor:
             cursor.execute(query.sql_query)
