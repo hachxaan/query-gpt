@@ -1,0 +1,23 @@
+@charset "UTF-8";
+
+table.dataTable td {
+    font-size: .9em;
+    padding: 0px;
+    /*width: 50px !important;*/
+    /*  white-space: nowrap !important;*/
+    /*  text-overflow: ellipsis !important;*/
+    /*  overflow: hidden !important;*/
+
+}
+
+table.dataTable th {
+    font-size: .8em;
+}
+
+@media (min-width: 576px) {
+    .modal-dialog {
+        max-width: 80% !important;
+        margin: 1.75rem auto;
+    }
+}
+

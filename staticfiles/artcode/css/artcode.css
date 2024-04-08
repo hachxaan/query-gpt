@@ -1,0 +1,54 @@
+
+
+.input-group-prepend {
+    height: 30px!important;
+
+}
+
+
+.input-group-prepend span{
+    padding: 5px!important;
+    font-size: small;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.input-group-append button{
+    height: 30px!important;
+    font-size: small;
+    padding-top: 4px;
+}
+
+.input-group input{
+    height: 30px!important;
+    font-size: small;
+}
+
+.uppercase {
+    text-transform: uppercase;
+}
+
+.main-footer {
+    height: 30px !important;
+    padding-top: 2px !important;
+    padding-bottom: 2px !important;
+}
+
+.status {
+    margin-top: 5px;
+    padding-top: 9px;
+    height: 30px;
+    /*width: 100%;*/
+}
+
+.status_table {
+    padding-top: 9px;
+    height: 30px;
+    width: 100%;
+}
+
+.fh_info {
+    font-size: small;
+}
