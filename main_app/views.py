@@ -63,6 +63,7 @@ def download_results(request, query_id):
 
 def query_list_download(request):
     # return render(request, "queries.html")
+    print("Query list download")
     queries = Query.objects.all()
     current_path = request.path
     return render(request, 'queries/queries.html', {'queries': queries, 'user': request.user, 'current_path': current_path})
