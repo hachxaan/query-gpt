@@ -86,7 +86,9 @@ def execute_query(query, query_id):
 
 def execute_query(query, query_id):
     try:
+        print('WTPFFFFFF:........................01')
         with connections["platform_db"].cursor() as cursor:
+            print('WTPFFFFFF:........................')
             cursor.execute(query)
             results = cursor.fetchall()
             
