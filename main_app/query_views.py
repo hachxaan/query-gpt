@@ -28,6 +28,61 @@ replacements = {
 import csv
 import os
 from django.conf import settings
+from .db_tunnel import open_ssh_tunnel, close_ssh_tunnel, get_tunnel_db_config
+
+def execute_query(query, query_id):
+    ssh_tunnel = None
+    try:
+        # Abre el túnel SSH
+        ssh_tunnel = open_ssh_tunnel()
+        
+        # Actualiza la configuración de la base de datos dinámicamente
+        db_config = get_tunnel_db_config(ssh_tunnel)
+        connections.databases['platform_db'] = db_config
+
+        # Ejecuta la consulta usando la conexión segura
+        with connections["platform_db"].cursor() as cursor:
+            cursor.execute(query)
+            results = cursor.fetchall()
+            
+            
+            # Obtener los nombres de las columnas del cursor
+            field_names = [col[0] for col in cursor.description]
+            
+            # Desencriptar ciertos campos
+            decrypted_results = []
+            for row in results:
+                decrypted_row = []
+                for idx, item in enumerate(row):
+                    if field_names[idx] in ["_email", "_last_name", "_birthdate", "_street_address", "_address_line_2", "_mobile_phone", "_payroll_daily", "_payroll_hourly", "_payroll_salary"]:
+                        if isinstance(item, memoryview):
+                            decrypted_item = query.decrypt(item.tobytes()) if item else None
+                            decrypted_row.append(decrypted_item)
+                        else:
+                            decrypted_row.append(item)
+                    else:
+                        decrypted_row.append(item)
+                decrypted_results.append(tuple(decrypted_row))
+
+            # Definir la ruta del archivo
+            file_path = os.path.join(settings.BASE_DIR, "main_app", "static", "data", f"{query_id}.csv")
+            
+            # Guardar los resultados desencriptados en un archivo CSV
+            with open(file_path, "w", newline='', encoding='utf-8') as csvfile:
+                writer = csv.writer(csvfile)
+                writer.writerow(field_names)  # Escribir nombres de las columnas
+                for row in decrypted_results:
+                    writer.writerow(row)
+
+    except Exception as e:
+        # Aquí deberías manejar o registrar el error de forma adecuada
+        print(f"Error executing query {query_id}: {str(e)}")
+        return None
+
+    finally:
+        # Asegúrate de cerrar el túnel SSH independientemente de si la consulta fue exitosa o no
+        if ssh_tunnel:
+            close_ssh_tunnel(ssh_tunnel)
 
 def execute_query(query, query_id):
     try:
