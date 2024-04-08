@@ -33,7 +33,7 @@ load_dotenv()
 
 def create_db_tunnel():
     server = SSHTunnelForwarder(
-        (os.getenv("SSH_TUNNEL_SERVER"), int(os.getenv("SSH_TUNNEL_PORT", "2221"))),  # La dirección del servidor SSH, por ejemplo, 'platform.multikrd.com'
+        (os.getenv("SSH_TUNNEL_HOST"), int(os.getenv("SSH_TUNNEL_PORT", "2221"))),  # La dirección del servidor SSH, por ejemplo, 'platform.multikrd.com'
         ssh_username=os.getenv("SSH_TUNNEL_USER"),  # Tu nombre de usuario en el servidor SSH
         ssh_password=os.getenv("SSH_TUNNEL_PASSWORD"),  # Tu contraseña o utiliza ssh_pkey con ssh_private_key_password si es necesario
         remote_bind_address=(os.getenv("POSTGRES_DNS"), int(os.getenv("POSTGRES_PORT"))),  # La dirección y el puerto de la base de datos en el servidor remoto
