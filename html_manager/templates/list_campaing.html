@@ -44,13 +44,13 @@
                                 </thead>
                                 <tbody>
                                     {% for campaign in mailing_campaigns %}
-                                    <tr>
+                                    <tr onclick="trCampaignSelect({{ campaign.id }}, {% if campaign.apply_permanent_images %}'true'{% else %}'false'{% endif %})">
                                         <td>{{ campaign.id }}</td>
                                         <td>{{ campaign.name }}</td>
                                         <td>{{ campaign.description }}</td>
                                         <td>{{ campaign.created_at }}</td>
                                         <td>
-                                            <button class="btn btn-danger btn-eliminar" onclick="deleteItem({{ campaign.id }})">
+                                            <button class="btn btn-danger btn-eliminar" data-id="{{ campaign.id }}" onclick="deleteItem({{ campaign.id }})">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </td>
@@ -90,7 +90,7 @@
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
-                                <button type="button" class="btn btn-primary btn-custom-color" data-toggle="modal" data-target="#importModal" data-pk="{{ pk_new }}">
+                                <button type="button" class="btn btn-primary btn-custom-color" data-toggle="modal" data-target="#importModal">
                                     Import campaigns
                                 </button>
 

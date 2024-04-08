@@ -59,7 +59,7 @@
                                             <th>Name</th>
                                             <th>Description</th>
                                             <th>Created At</th>
-                                            <th>Eliminar</th>
+                                            <th>Eliminare</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -167,6 +167,7 @@
                     csrfmiddlewaretoken: '{{ csrf_token }}'
                 },
                 success: function(response) {
+                    console.log('WWWWWWWWWTTTPPPFFFF: deleteItem(pk)');
                     location.reload();
                 },
                 error: function(xhr, status, error) {

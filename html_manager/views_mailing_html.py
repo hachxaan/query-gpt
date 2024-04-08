@@ -13,11 +13,11 @@ from django.shortcuts import redirect
 
 
 
-def import_csv(request, pk):
+def import_csv(request, pk, apply_permanent_images):
     if request.method == 'POST':
         csv_file = request.FILES.get('csvFile')
         print(type(csv_file))
-        print(csv_file)
+        print(csv_file)     
         # Process the CSV file here
         csv_data = []
         data = csv_file.read().decode('utf-8')
@@ -28,10 +28,13 @@ def import_csv(request, pk):
 
         html_factory = HTMLFactory(csv_data)
         mailing_campaign = MailingCampaign.objects.filter(pk=pk).first()
+
+        apply_permanent_images = bool(int(apply_permanent_images))
         # Process each row in the CSV data
         for row in csv_data:
             # Generate HTML code for each row
-            html_code = html_factory.generate_html(row)
+            
+            html_code = html_factory.generate_html(row, mailing_campaign, apply_permanent_images)
             
             # Create a new MailingHTML object
             mailing_html = MailingHTML(
@@ -51,8 +54,7 @@ def import_csv(request, pk):
     return render(request, 'list_campaing.html', {
         'mailing_campaigns': mailing_campaigns,
         'form': form,
-        "crispy": crispy_form,
-        "pk_new": pk
+        "crispy": crispy_form
     })
 
 

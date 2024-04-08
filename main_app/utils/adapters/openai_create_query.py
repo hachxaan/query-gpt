@@ -39,8 +39,8 @@ class OpenAIAPIQueryAdapter:
 
         specific_considerations = """ 
         - Respeta los campos con guión bajo, por ejemplo _last_name debe ser _last_name.
-        - usuarios = clientes, usuario = cliente
-        - creditos = credito = Wage Access = wage acccess = WA = wa
+        - usuarios = clientes, usuario = cliente, empleado = user
+        - creditos = credito = Wage Access = wage acccess = WA = wa = EWA
         - fee = comision, fees = comisiones
         - Para saber si un usuario tiene banking, se debe revisar si el campo users.customer_uuid no es nulo.
         - Para las relaciones de las tablas: 

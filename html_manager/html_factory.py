@@ -3,13 +3,14 @@
 from typing import Dict, Tuple
 
 from file_management.models import MailingFactory
+from html_manager.models import MailingCampaign
 
 
 class HTMLFactory:
     def __init__(self, data):
         self.data = data 
 
-    def generate_html(self, row: Dict[str, str]) -> str:
+    def generate_html(self, row: Dict[str, str], mailing_campaign: MailingCampaign, apply_permanent_images: bool) -> str:
         """
         Genera el código HTML a partir de los datos proporcionados.
 
@@ -41,20 +42,34 @@ class HTMLFactory:
         }
         section_contents = {'templateHeader': '', 'templateBody': '', 'templateFooter': ''}
         
-        company_name = row['white_label'].lower()
+        apply_permanent_images
+
+        white_label = None
+        white_label = row['white_label'].lower()
         for key, value in row.items():
+
             if key != 'white_label' and value:
                 prefix, image_name = self.parse_column(value)
                 section = section_templates.get(prefix)
                 if section:
                     
-                    record_file = MailingFactory.objects.filter(white_label=company_name, name=image_name).first()
+                    record_file = MailingFactory.objects.filter(white_label=white_label, name=image_name).first()
                     if record_file:
                         href = record_file.href
                     else:
                         href = ''
-                    section_contents[section] += self.generate_image_block(company_name, image_name, href, prefix)
-        content_html = ''
+
+                    if apply_permanent_images:
+                        permanet_sections = MailingFactory.objects.filter(white_label=white_label, permanent=True).order_by('order', 'pk')
+                        for section in permanet_sections:
+                            if section.type == 'header':
+                                section_contents[section] += self.generate_image_block(white_label, image_name, href, prefix)
+
+
+                    section_contents[section] += self.generate_image_block(white_label, image_name, href, prefix)
+            else:
+                white_label = row['white_label'].lower()
+
         for section in ['templateHeader', 'templateBody', 'templateFooter']:
             content_html += f'<tr><td valign="top" id="{section}">{section_contents[section]}</td></tr>'
         return html_template.format(content=content_html)

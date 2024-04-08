@@ -12,6 +12,7 @@ class MailingFactory(models.Model):
     href = models.TextField(default='')
     extension = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
+    order = models.IntegerField(default=0)
     @property
     def file_url(self):
         # Assuming the file is stored in a specific directory
@@ -22,6 +23,19 @@ class MailingFactory(models.Model):
     
     def __str__(self):
         return self.name
+    
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            self.set_order_by_type()
+        super().save(*args, **kwargs)
+    
+    def set_order_by_type(self):
+        if self.type == 'header':
+            self.order = 1
+        elif self.type == 'footer':
+            self.order = 3
+        else:
+            self.order = 2
 
 
 # class MailingTemplate(models.Model):

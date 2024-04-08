@@ -140,15 +140,18 @@
                 </div>
                 <div class="modal-body">
                     <!-- Add your import form here -->
-                    <form id="importForm" method="post" action="{% url 'import_csv' pk=0 %}" enctype="multipart/form-data">
+                    <form id="importForm" method="post" action="{% url 'import_csv' pk=0 apply_permanent_images=1 %}" enctype="multipart/form-data">
                         {% csrf_token %}
                         <div class="form-group">
                             <label for="csvFile">Archivo CSV</label>
-                            <input type="file" class="form-control-file" id="csvFile" name="csvFile" accept=".csv">
+                            <input type="file" class="form-control-file" id="csvFile" name="csvFile" accept=".csv" onchange="enableButton()" value="">
                         </div>
-                        <button type="submit" class="btn btn-primary">Importar</button>
+                        
+                        <input type="checkbox" id="apply_permanent_images" name="apply_permanent_images"> Apply Permanent Images
+                        <button type="submit" class="btn btn-primary" id="importButton" disabled>Importar</button>
                     </form>
                 </div>
+
             </div>
         </div>
     </div>
@@ -199,15 +202,42 @@
     var deleteCampaignUrl = "{% url 'mailing_campaign_delete' pk=0 %}"; 
     var deleteHTMLUrl = "{% url 'delete_mailing_html' pk=0 %}"; 
     var downloadHTML = "{% url 'download_html' pk=0 %}"; 
-    
+    var selectedRows = localStorage.getItem('selectedRow');
+    var apply_permanent_images = localStorage.getItem('apply_permanent_images');
+
 
     console.log('INIT', createUrl)
 
-
-    var pk_new = "{{ pk_new }}";
+    
+    {% if request.session.pk_delete %}
+        
+        console.log('------------- new_campaign_id', "{{ request.session.pk_delete }}");
+        var new_campaign_id = "{{ pk_delete }}";    
+    {% endif %}
     var campaign_count = parseInt("{{ campaign_count }}");
 
 
+    function enableButton() {
+        var fileInput = document.getElementById("csvFile");
+        var importButton = document.getElementById("importButton");
+        
+        if (fileInput.files.length > 0) {
+            importButton.disabled = false;
+        } else {
+            importButton.disabled = true;
+        }
+    }
+
+    function updateAction() {
+
+        var baseUrl = "{% url 'import_csv' pk='9' apply_permanent_images='9999999999' %}";
+        var selectedRows = localStorage.getItem('selectedRow');
+        var applyPermanentImages = document.getElementById("apply_permanent_images").checked;
+        var applyPermanentImagesValue = applyPermanentImages ? '1' : '0'; 
+        var actionUrl = baseUrl.replace('9', selectedRows).replace('9999999999', applyPermanentImagesValue);
+    
+        $('#importForm').attr('action', actionUrl);
+    }
 
     function deleteItem(pk) {
         if (confirm('Are you sure you want to delete this item?')) {
@@ -218,7 +248,14 @@
                     csrfmiddlewaretoken: '{{ csrf_token }}'
                 },
                 success: function(response) {
-                    location.reload();
+                    localStorage.removeItem('selectedRow');
+
+                    var table = $('#campaignTable').DataTable();
+                    // Utiliza el ID o alguna otra forma de identificar la fila única para eliminarla.
+                    $('button[data-id="' + pk + '"]').parents('tr').each(function(){
+                        table.row($(this)).remove().draw();
+                    });
+                    $('#htmlTable').DataTable().clear().draw(); 
                 },
                 error: function(xhr, status, error) {
                     // Handle error response
@@ -226,6 +263,13 @@
                 }
             });
         }
+    }
+
+    function trCampaignSelect(pk, apply_permanent_images) {
+        console.log('apply_permanent_images:-----', apply_permanent_images);
+        localStorage.setItem('selectedRow', pk);
+        localStorage.setItem('apply_permanent_images', apply_permanent_images);
+        get_html_list( pk);
     }
 
     function get_html_list(pk) {
@@ -277,7 +321,7 @@
                     "render": function(data, type, row) {
                         return "<button class='btn btn-primary btn-descargar' style='margin-right: 10px;'><i class='fas fa-download'></i></button>" +
                                "<button class='btn btn-info btn-ver' style='margin-right: 10px;'><i class='fas fa-eye'></i></button>" +
-                            "<button id='btn-eliminar-" + data.id + "' class='btn btn-danger btn-eliminar'><i class='fas fa-trash custom-trash-icon'></i></button>";
+                               "<button id='btn-eliminar-" + data.id + "' class='btn btn-danger btn-eliminar'><i class='fas fa-trash custom-trash-icon'></i></button>";
                     }
                 }
             ],
@@ -351,68 +395,27 @@
             "stateSave": true,
         });
 
-        // var table_html = $('#htmlTable').DataTable({
-        //     "paging": true,
-        //     "ordering": true,
-        //     "info": true,
-        //     "searching": true,
-        //     "select": {
-        //         "style": "single"
-        //     },
-        //     "stateSave": true,
-        // });
-
-
-        if (pk_new !== ""){
-            console.log('entro');
-            var selectedRows = pk_new;
-        } else {
-            console.log('no entro');
-            var selectedRows = localStorage.getItem('selectedRow');
-            console.log(selectedRows);
-        }
-        
         // Restaurar la selección
         if (selectedRows) {
             campaignTable.rows().deselect();
-            
             campaignTable.rows().every(function() {
                 var data = this.data();
                 if ( String(data[0]) == String(selectedRows)) {
-                    console.log('WTPF');
                     this.select();
                 }
             });
-            
-            console.log('selectedRows: if (selectedRows)', selectedRows);
             get_html_list(selectedRows)
-    
         }
-
-        campaignTable.on('select', function () {
-            
-            var selectedRow = campaignTable.row({ selected: true }).data()[0];
-            localStorage.setItem('selectedRow', selectedRow);
-            console.log('selectedRows: table.on(select)', selectedRows);
-            get_html_list(selectedRow);
-        });
-
-        campaignTable.on('deselect', function () {
-            // Eliminar el ID seleccionado del almacenamiento local
-            localStorage.removeItem('selectedRow');
-        });
-
 
         $('#create').click(function() {
             window.location.href = createUrl;
         });
 
         $('#importModal').on('show.bs.modal', function(event) {
-
-            // Actualiza el atributo 'action' del formulario
-            var selectedRows = localStorage.getItem('selectedRow');
-            var actionUrl = "{% url 'import_csv' pk='0' %}".replace('0', selectedRows);
-            $('#importForm').attr('action', actionUrl);
+            var apply_permanent_images = localStorage.getItem('apply_permanent_images');            
+            $('#apply_permanent_images').prop('checked', apply_permanent_images === 'true');
+            $('#csvFile').val('');
+            $('#importButton').prop('disabled', true);
         });
 
 
