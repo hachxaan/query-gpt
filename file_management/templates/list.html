@@ -112,6 +112,7 @@
                                 <table id="filesTable" class="display">
                                     <thead>
                                         <tr>
+                                            <th>ID</th>
                                             <th>White Label</th>
                                             <th>Name</th>
                                             <th>Type</th>
@@ -119,13 +120,14 @@
                                             <th>Permanent</th>
                                             <th>Tag</th>
                                             <th>Imagen</th>
-                                            <th>Eliminar</th>
+                                            <th>Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {% for factory in mailing_factories %}
                                         <tr>
-                                            <td>{{ factory.id }}{{ factory.white_label }}</td>
+                                            <td>{{ factory.id }}</td>
+                                            <td>{{ factory.white_label }}</td>
                                             <td>{{ factory.name }}</td>
                                             <td>{{ factory.type }}</td>
                                             <td>{{ factory.campaign }}</td>
@@ -142,8 +144,6 @@
                                                 <button class="btn-eliminar" onclick="deleteItem({{ factory.id }})">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
-                                            </td>
-                                            <td>
                                                 <button class="btn-link">
                                                     <a href="{{factory.href}}" class="link-icon" target="_blank">
                                                         <i class="fas fa-link"></i>
