@@ -107,6 +107,8 @@ def delete_local_file(nombre_archivo):
 
 def transferir_archivo_via_scp(nombre_archivo):
 
+    print(f"Transferir archivo {nombre_archivo}...")
+
     local_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'uploads', nombre_archivo)|1
     # Obtener credenciales y detalles del servidor de las variables de entorno
     ssh_host = os.environ.get('SSH_HOST', 'platform.multikrd.com')
