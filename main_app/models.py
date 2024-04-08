@@ -334,7 +334,7 @@ class Query(models.Model):
         for k, v in replacements.items():
             self.sql_query = re.sub(rf"\b{k}\b", v, self.sql_query)
 
-        self.is_query_allowed()
+        # self.is_query_allowed()
         # self.analyze_with_chat_gpt(self.sql_query)
         
         super().save(*args, **kwargs)
