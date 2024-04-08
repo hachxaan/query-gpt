@@ -113,6 +113,8 @@ def transferir_archivo_via_scp(nombre_archivo):
     ssh_port = int(os.environ.get('SSH_PORT', 2201))
     ssh_user = os.environ.get('SSH_USER')
     ssh_password = os.environ.get('SSH_PASSWORD')
+
+    print(f"Transferir archivo {nombre_archivo} a {ssh_host}...")
     
     # Crear una instancia de SSHClient
     ssh = paramiko.SSHClient()
