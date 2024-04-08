@@ -107,17 +107,14 @@ def delete_local_file(nombre_archivo):
 
 def transferir_archivo_via_scp(nombre_archivo):
 
-    print(f"Transferir archivo {nombre_archivo}...")
 
-    local_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'uploads', nombre_archivo)|1
+    local_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'uploads', nombre_archivo)
     # Obtener credenciales y detalles del servidor de las variables de entorno
     ssh_host = os.environ.get('SSH_HOST', 'platform.multikrd.com')
     ssh_port = int(os.environ.get('SSH_PORT', 2201))
     ssh_user = os.environ.get('SSH_USER')
     ssh_password = os.environ.get('SSH_PASSWORD')
 
-    print(f"Transferir archivo {nombre_archivo} a {ssh_host}...")
-    
     # Crear una instancia de SSHClient
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
