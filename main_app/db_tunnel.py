@@ -41,3 +41,30 @@ def  get_tunnel_db_config(server):
             "AUTOCOMMIT": False,
         }
     return {}
+
+
+def  get_default_db_config(server):
+    if server:
+        print(".................................. Get Tunnel DB Config .................................. ")
+
+        return {
+            "ENGINE": "django.db.backends.postgresql_psycopg2",
+            "NAME": os.getenv("POSTGRES_DB_MKT"),
+            "USER": os.getenv("POSTGRES_USER_MKT"),
+            "PASSWORD": os.getenv("POSTGRES_PASSWORD_MKT"),
+            "HOST": os.getenv("POSTGRES_DNS_MKT"),
+            "PORT": os.getenv("POSTGRES_PORT_MKT"),
+            "TIME_ZONE": "UTC",
+            "CONN_HEALTH_CHECKS": False,
+            "CONN_MAX_AGE": 0,
+            "OPTIONS": {},
+            "TEST": {
+                "CHARSET": None, 
+                "COLLATION": None, 
+                "MIGRATE": True, 
+                "MIRROR": None, 
+                "NAME": None
+            },
+            "AUTOCOMMIT": False,
+        }
+    return {}
