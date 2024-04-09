@@ -1,5 +1,3 @@
-# en un archivo separado, por ejemplo, db_tunnel.py
-from django.db import connections
 from sshtunnel import SSHTunnelForwarder
 import os
 
@@ -17,13 +15,14 @@ def close_ssh_tunnel(server):
     if server:
         server.stop()
 
-def get_tunnel_db_config(server):
+def  get_tunnel_db_config(server):
     if server:
         return {
             "ENGINE": "django.db.backends.postgresql",
             "NAME": os.getenv("POSTGRES_DB"),
             "USER": os.getenv("POSTGRES_USER"),
             "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
+            "ATOMIC_REQUESTS": True,
             "HOST": "127.0.0.1",
             "PORT": server.local_bind_port,
         }
