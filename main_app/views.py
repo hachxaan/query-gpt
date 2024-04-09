@@ -1,4 +1,5 @@
 import csv
+import os
 from django.db import connections
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -25,6 +26,15 @@ def download_results(request, query_id):
         db_config = get_tunnel_db_config(ssh_tunnel)
 
         connections.databases['platform_db'] = db_config
+        connections.databases['default'] = {
+            "ENGINE": "django.db.backends.postgresql_psycopg2",
+            "NAME": os.getenv("POSTGRES_DB_MKT"),
+            "USER": os.getenv("POSTGRES_USER_MKT"),
+            "PASSWORD": os.getenv("POSTGRES_PASSWORD_MKT"),
+            "HOST": os.getenv("POSTGRES_DNS_MKT"),
+            "PORT": os.getenv("POSTGRES_PORT_MKT"),
+            "TIME_ZONE": "UTC",
+        }
 
         with connections['platform_db'].cursor() as cursor:
             cursor.execute(query.sql_query)
