@@ -169,3 +169,5 @@ cython_debug/
 src/billpayments/infraestructure/indexes/
 **/indexes/**
 .DS_Store
+
+.env-develop

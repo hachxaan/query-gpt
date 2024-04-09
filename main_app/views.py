@@ -24,17 +24,11 @@ def download_results(request, query_id):
         ssh_tunnel = open_ssh_tunnel()
         db_config = get_tunnel_db_config(ssh_tunnel)
 
-        print(db_config)
         connections.databases['platform_db'] = db_config
-        print(".......................... 01 .......................... ")
         with connections['platform_db'].cursor() as cursor:
-            print(".......................... 011 .......................... ")
             cursor.execute(query.sql_query)
-            print(".......................... 012 .......................... ")
             field_names = [desc[0] for desc in cursor.description]
-            print(".......................... 03 .......................... ")
             results = cursor.fetchall()
-        print(".......................... 02 .......................... ")
         decrypted_results = [
             [
                 query.decrypt(item.tobytes()) if isinstance(item, memoryview) and field_names[idx] in [
@@ -45,11 +39,7 @@ def download_results(request, query_id):
             ] for row in results
         ]
 
-        # filename = f"{re.sub(r'[^\w\s-]', '', query.title).replace(' ', '_')}_{datetime.datetime.now().strftime('%Y%m%d%H%M')}.csv"
-        # cleaned_title = re.sub(r'[^\w\s-]', '', query.title).replace(' ', '_')
-        # timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M')
-        # filename = cleaned_title + '_' + timestamp + '.csv'
-        filename = 'dlksajdlsajdlakas.csv'
+        filename = re.sub(r'[^\w\s-]', '', query.title).replace(' ', '_') + '_' + datetime.datetime.now().strftime('%Y%m%d%H%M') + '.csv'
 
         response = HttpResponse(content_type="text/csv")
         response["Content-Disposition"] = f'attachment; filename="{filename}"'
@@ -81,7 +71,7 @@ def query_list_download(request):
 
 @login_required
 def home(request):
-    print(".................................. Hom .................................. ")
+    print(".................................. Home .................................. ")
     # return render(request, "queries.html")
     # queries = Query.objects.all()
     current_path = request.path
