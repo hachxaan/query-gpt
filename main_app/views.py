@@ -25,7 +25,7 @@ def download_results(request, query_id):
         db_config = get_tunnel_db_config(ssh_tunnel)
 
         connections.databases['platform_db'] = db_config
-        print(connections.databases['default'])
+
         with connections['platform_db'].cursor() as cursor:
             cursor.execute(query.sql_query)
             field_names = [desc[0] for desc in cursor.description]

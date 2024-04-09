@@ -28,7 +28,15 @@ def  get_tunnel_db_config(server):
             "HOST": "127.0.0.1",
             "PORT": server.local_bind_port,
             "TIME_ZONE": 'UTC',
-            "CONN_HEALTH_CHECKS": None,
+            "CONN_HEALTH_CHECKS": False,
             "CONN_MAX_AGE": 0,
+            "OPTIONS": {},
+            "TEST": {
+                "CHARSET": None, 
+                "COLLATION": None, 
+                "MIGRATE": True, 
+                "MIRROR": None, 
+                "NAME": None
+            }
         }
     return {}
