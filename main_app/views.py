@@ -11,6 +11,7 @@ from .db_tunnel import get_default_db_config, open_ssh_tunnel, close_ssh_tunnel,
 
 import re
 import datetime
+import time
 
 # from django.core.exceptions import ObjectDoesNotExist
 
@@ -24,6 +25,8 @@ def download_results(request, query_id):
         # Abre el túnel SSH y configura la conexión
         ssh_tunnel = open_ssh_tunnel()
         db_config = get_tunnel_db_config(ssh_tunnel)
+        # Add a sleep of 1 second
+        time.sleep(1)
         db_default_config = get_default_db_config(ssh_tunnel)
 
         connections.databases['platform_db'] = db_config
