@@ -58,6 +58,7 @@ def  get_default_db_config(server):
             "CONN_HEALTH_CHECKS": False,
             "CONN_MAX_AGE": 0,
             "OPTIONS": {},
+            "ATOMIC_REQUESTS": True,
             "TEST": {
                 "CHARSET": None, 
                 "COLLATION": None, 
