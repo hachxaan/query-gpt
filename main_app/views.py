@@ -1,38 +1,20 @@
 import csv
-import os
 from django.db import connections
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.http import HttpResponse
 from django.shortcuts import render
 from .models import Query
-from .db_tunnel import get_default_db_config, open_ssh_tunnel, close_ssh_tunnel, get_tunnel_db_config
-
-
 import re
 import datetime
-import time
-from django.conf import settings
 from django.db import connections
-
-# from django.core.exceptions import ObjectDoesNotExist
 
 @login_required
 def download_results(request, query_id):
     print(".................................. Download Results .................................. ")
-    ssh_tunnel = None
     try:
         query = Query.objects.get(pk=query_id)
         
-        # Abre el túnel SSH y configura la conexión
-        ssh_tunnel = open_ssh_tunnel()
-        time.sleep(1)
-        db_config = get_tunnel_db_config(ssh_tunnel)
-        db_default_config = get_default_db_config(ssh_tunnel)
-
-        connections.databases['platform_db'] = db_config
-        connections.databases['default'] = db_default_config
-
         with connections['platform_db'].cursor() as cursor:
             cursor.execute(query.sql_query)
             field_names = [desc[0] for desc in cursor.description]
@@ -65,16 +47,10 @@ def download_results(request, query_id):
         print('Exception: ')
         print(str(e))
         return render(request, 'error_template.html', {'error': str(e)})
-    finally:
-        if ssh_tunnel:
-            close_ssh_tunnel(ssh_tunnel)
+
 
 def query_list_download(request):
     print(".................................. Query List Download .................................. ")
-    db_config = connections['default'].settings_dict
-    host = db_config['HOST']
-    port = db_config['PORT']
-    print(f"Database configuration - Host: {host}, Port: {port}")
     queries = Query.objects.all()
     current_path = request.path
     return render(request, 'queries/queries.html', {'queries': queries, 'user': request.user, 'current_path': current_path})
@@ -83,8 +59,6 @@ def query_list_download(request):
 @login_required
 def home(request):
     print(".................................. Home .................................. ")
-    # return render(request, "queries.html")
-    # queries = Query.objects.all()
     current_path = request.path
     return render(request, 'home.html', {'current_path': current_path, 'user': request.user})
 
@@ -102,5 +76,3 @@ def execute_query(request, query_id):
         return JsonResponse({"error": "Query not found."}, status=404)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
-
-
