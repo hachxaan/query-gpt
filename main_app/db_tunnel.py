@@ -37,6 +37,7 @@ def  get_tunnel_db_config(server):
                 "MIGRATE": True, 
                 "MIRROR": None, 
                 "NAME": None
-            }
+            },
+            "AUTOCOMMIT": False,
         }
     return {}
