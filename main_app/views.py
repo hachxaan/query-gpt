@@ -43,7 +43,10 @@ def download_results(request, query_id):
         ]
 
         # filename = f"{re.sub(r'[^\w\s-]', '', query.title).replace(' ', '_')}_{datetime.datetime.now().strftime('%Y%m%d%H%M')}.csv"
-        filename = f"{re.sub(r'[^\w\s-]', '', query.title).replace(' ', '_')}_{datetime.datetime.now().strftime('%%Y%%m%%d%%H%%M')}.csv"
+        cleaned_title = re.sub(r'[^\w\s-]', '', query.title).replace(' ', '_')
+        timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M')
+        filename = cleaned_title + '_' + timestamp + '.csv'
+
 
         response = HttpResponse(content_type="text/csv")
         response["Content-Disposition"] = f'attachment; filename="{filename}"'
