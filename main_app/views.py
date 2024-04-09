@@ -12,6 +12,8 @@ from .db_tunnel import get_default_db_config, open_ssh_tunnel, close_ssh_tunnel,
 import re
 import datetime
 import time
+from django.conf import settings
+from django.db import connections
 
 # from django.core.exceptions import ObjectDoesNotExist
 
@@ -68,8 +70,11 @@ def download_results(request, query_id):
             close_ssh_tunnel(ssh_tunnel)
 
 def query_list_download(request):
-    # return render(request, "queries.html")
     print(".................................. Query List Download .................................. ")
+    db_config = connections['default'].settings_dict
+    host = db_config['HOST']
+    port = db_config['PORT']
+    print(f"Database configuration - Host: {host}, Port: {port}")
     queries = Query.objects.all()
     current_path = request.path
     return render(request, 'queries/queries.html', {'queries': queries, 'user': request.user, 'current_path': current_path})
