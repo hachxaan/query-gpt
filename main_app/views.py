@@ -26,12 +26,15 @@ def download_results(request, query_id):
 
         print(db_config)
         connections.databases['platform_db'] = db_config
-        
+        print(".......................... 01 .......................... ")
         with connections['platform_db'].cursor() as cursor:
+            print(".......................... 011 .......................... ")
             cursor.execute(query.sql_query)
+            print(".......................... 012 .......................... ")
             field_names = [desc[0] for desc in cursor.description]
+            print(".......................... 03 .......................... ")
             results = cursor.fetchall()
-        
+        print(".......................... 02 .......................... ")
         decrypted_results = [
             [
                 query.decrypt(item.tobytes()) if isinstance(item, memoryview) and field_names[idx] in [
