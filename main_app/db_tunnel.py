@@ -27,6 +27,7 @@ def  get_tunnel_db_config(server):
             "ATOMIC_REQUESTS": True,
             "HOST": "127.0.0.1",
             "PORT": server.local_bind_port,
-            'TIME_ZONE': 'UTC',
+            "TIME_ZONE": 'UTC',
+            "CONN_HEALTH_CHECKS": None,
         }
     return {}
