@@ -64,6 +64,8 @@ def download_results(request, query_id):
         return render(request, 'error_template.html', {'error': 'Query not found.'})
     except Exception as e:
         # Log the error here if you have logging setup
+        print('Exception: ')
+        print(str(e))
         return render(request, 'error_template.html', {'error': str(e)})
     finally:
         if ssh_tunnel:
