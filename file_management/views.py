@@ -115,6 +115,7 @@ def transferir_archivo_via_scp(nombre_archivo):
     ssh_user = os.environ.get('SSH_USER')
     ssh_password = os.environ.get('SSH_PASSWORD')
 
+    
     # Crear una instancia de SSHClient
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -127,7 +128,7 @@ def transferir_archivo_via_scp(nombre_archivo):
         sftp = ssh.open_sftp()
         
         # Ruta remota donde se guardará el archivo
-        remote_path = "" # f"/var/www/mailing/files/{nombre_archivo}"
+        remote_path = f"/var/www/mailing/files/{nombre_archivo}"
         
         # Transferir el archivo
         sftp.put(local_path, remote_path)
