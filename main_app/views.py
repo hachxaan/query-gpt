@@ -42,10 +42,7 @@ def download_results(request, query_id):
             ] for row in results
         ]
 
-        # filename = f"{re.sub(r'[^\w\s-]', '', query.title).replace(' ', '_')}_{datetime.datetime.now().strftime('%Y%m%d%H%M')}.csv"
-        cleaned_title = "dsadasdsaa" # = re.sub(r'[^\w\s-]', '', query.title).replace(' ', '_')
-        timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M')
-        filename = cleaned_title + '_' + timestamp + '.csv'
+        filename = "algffa" # f"{re.sub(r'[^\w\s-]', '', query.title).replace(' ', '_')}_{datetime.datetime.now().strftime('%Y%m%d%H%M')}.csv"
 
 
         response = HttpResponse(content_type="text/csv")
