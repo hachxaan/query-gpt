@@ -15,10 +15,10 @@ NotifyAccess=all
 StandardOutput=journal
 StandardError=journal
 
-WorkingDirectory=/opt/backoffice/query-gpt
-Environment="PATH=/opt/backoffice/query-gpt/venv/bin"
+WorkingDirectory=/home/administrador/microservices/microservice-backoffice
+Environment="PATH=/home/administrador/microservices/microservice-backoffice/venv/bin"
 Environment="DJANGO_SETTINGS_MODULE=marketing_queries.settings"
-ExecStart=/opt/backoffice/query-gpt/venv/bin/uwsgi --ini backoffice-beta.ini
+ExecStart=/home/administrador/microservices/microservice-backoffice/venv/bin/uwsgi --ini backoffice-beta.ini
 
 [Install]
 WantedBy=multi-user.target
