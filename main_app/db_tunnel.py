@@ -1,4 +1,3 @@
-from marketing_queries.settings import TIME_ZONE
 from sshtunnel import SSHTunnelForwarder
 import os
 
@@ -19,7 +18,6 @@ def close_ssh_tunnel(server):
 def  get_tunnel_db_config(server):
     if server:
         print(".................................. Get Tunnel DB Config .................................. ")
-        print(TIME_ZONE)
 
         return {
             "ENGINE": "django.db.backends.postgresql",
@@ -29,5 +27,6 @@ def  get_tunnel_db_config(server):
             "ATOMIC_REQUESTS": True,
             "HOST": "127.0.0.1",
             "PORT": server.local_bind_port,
+            'TIME_ZONE': 'UTC',
         }
     return {}
