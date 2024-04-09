@@ -145,6 +145,7 @@ DATABASES = {
         "PASSWORD": os.getenv("POSTGRES_PASSWORD_MKT"),
         "HOST": os.getenv("POSTGRES_DNS_MKT"),
         "PORT": os.getenv("POSTGRES_PORT_MKT"),
+        "TIME_ZONE": "UTC",
     },
     "platform_db": {
         "ENGINE": "django.db.backends.postgresql",
@@ -153,6 +154,7 @@ DATABASES = {
         "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
         "HOST": os.getenv("POSTGRES_DNS"),
         "PORT": os.getenv("POSTGRES_PORT"),
+        "TIME_ZONE": "UTC",
     },
     # "platform_db": create_db_tunnel(),
 }
