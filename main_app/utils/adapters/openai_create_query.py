@@ -19,6 +19,7 @@ class OpenAIAPIQueryAdapter:
             - No realices join a otras tablas si no se utiliza ningún campo de estas tablas.
             
             ### Consideraciones Específicas
+            - Estas reglas son obligatorias e importantes.
             {specific_considerations}
 
             ### Formato de respuesta:

@@ -42,7 +42,7 @@ class HTMLFactory:
         }
         section_contents = {'templateHeader': '', 'templateBody': '', 'templateFooter': ''}
         
-        apply_permanent_images
+        
 
         white_label = None
         white_label = row['white_label'].lower()
@@ -61,15 +61,19 @@ class HTMLFactory:
 
                     if apply_permanent_images:
                         permanet_sections = MailingFactory.objects.filter(white_label=white_label, permanent=True).order_by('order', 'pk')
-                        for section in permanet_sections:
-                            if section.type == 'header':
-                                section_contents[section] += self.generate_image_block(white_label, image_name, href, prefix)
+                        for permanet_section in permanet_sections:
+                            if permanet_section.type == 'header':
+                                section_contents['templateHeader'] += self.generate_image_block(white_label, image_name, href, prefix)
 
+                            if permanet_section.type == 'footer':
+                                section_contents['templateFooter'] += self.generate_image_block(white_label, image_name, href, prefix)
+
+                        apply_permanent_images = False
 
                     section_contents[section] += self.generate_image_block(white_label, image_name, href, prefix)
             else:
                 white_label = row['white_label'].lower()
-
+        content_html = ''
         for section in ['templateHeader', 'templateBody', 'templateFooter']:
             content_html += f'<tr><td valign="top" id="{section}">{section_contents[section]}</td></tr>'
         return html_template.format(content=content_html)
