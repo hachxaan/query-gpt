@@ -170,6 +170,7 @@ class Query(models.Model):
     active = models.BooleanField(default=True)
     created_date = models.DateTimeField(auto_now_add=True)
     sql_query = models.TextField()
+    is_public = models.BooleanField(default=False)
 
     class Meta:
         permissions = [("execute_query", "Can execute queries")]

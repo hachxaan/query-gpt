@@ -8,6 +8,7 @@ from .models import Query
 import re
 import datetime
 from django.db import connections
+from django.db.models import Q
 
 @login_required
 def download_results(request, query_id):
@@ -54,7 +55,8 @@ def query_list_download(request):
     if request.user.is_superuser:
         queries = Query.objects.all()
     else:
-        queries = Query.objects.filter(author=request.user)
+        queries = Query.objects.filter(Q(author=request.user) | Q(is_public=True))
+
     current_path = request.path
     return render(request, 'queries/queries.html', {'queries': queries, 'user': request.user, 'current_path': current_path})
 

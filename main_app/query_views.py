@@ -8,10 +8,8 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import random
 import string
-from django.db import connections
-import csv
-import os
-from django.conf import settings
+from django.db.models import Q
+
 
 replacements = {
     'email': '_email',
@@ -202,7 +200,7 @@ def query_list(request):
     if request.user.is_superuser:
         queries = Query.objects.all()
     else:
-        queries = Query.objects.filter(author=request.user)
+        queries = Query.objects.filter(Q(author=request.user) | Q(is_public=True))
 
     current_path = request.path
     return render(request, 'queries/list.html', {
