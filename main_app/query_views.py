@@ -199,7 +199,9 @@ def get_query_from_gpt(request):
 
 @csrf_exempt
 def query_list(request):
-    queries = Query.objects.all()
+    # queries = Query.objects.all()
+    queries = Query.objects.filter(author=request.user)
+
     current_path = request.path
     return render(request, 'queries/list.html', {
         'queries': queries,
