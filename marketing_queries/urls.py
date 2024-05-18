@@ -4,6 +4,7 @@ from main_app import marketing_views, views
 from main_app import urls
 from file_management import urls as urls_file_management
 from html_manager import urls as html_manager_urls
+from django.conf.urls import handler404
 from main_app import query_views
 
 urlpatterns = [
@@ -37,3 +38,4 @@ urlpatterns = [
 
 ]
 
+handler404 = 'main_app.views.error_404' 

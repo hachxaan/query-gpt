@@ -245,6 +245,10 @@ def query_delete(request, query_id):
     return render(request, 'queries/confirm_delete.html', {'object': query})
 
 
+
+def redirect_to_home(request, exception=None):
+    return redirect('home') 
+
 """
 SELECT u.id, u.first_name, u._email, u._birthdate, u.registration_date, u.last_login_date, u.mobile_phone, u.state, u.company_id, u.payroll_frequency, u.payroll_last_date, u.signup_date, u.inactive, u.terms_conditions, u.promotional_sms, u.promotional_email, u._street_address, u._address_line_2, u._payroll_daily, u._payroll_hourly, u._payroll_salary, u.payroll_type, u.city, u.zip_code, u.promotional_code, u.payroll_active, u._last_name FROM users u JOIN companies c ON u.company_id = c.id WHERE u.inactive = true AND c.white_label_tag = 'insperity'
 """
