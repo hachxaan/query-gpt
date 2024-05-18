@@ -1,5 +1,6 @@
 import csv
 from django.db import connections
+from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.http import HttpResponse
@@ -48,7 +49,7 @@ def download_results(request, query_id):
         print(str(e))
         return render(request, 'error_template.html', {'error': str(e)})
 
-
+@csrf_exempt
 def query_list_download(request):
     print(".................................. Query List Download .................................. ")
     queries = Query.objects.all()

@@ -1,6 +1,7 @@
 # file_management/views.py
 
 import os
+from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import redirect, render, get_object_or_404
 from django.http import JsonResponse
 import paramiko
@@ -8,7 +9,7 @@ from file_management.forms import FileUploadForm
 from file_management.models import MailingFactory
 from crispy_forms.helper import FormHelper
 
-
+@csrf_exempt
 def mailing_factory_list(request):
     mailing_factories = MailingFactory.objects.all()
     form = FileUploadForm()
@@ -19,6 +20,7 @@ def mailing_factory_list(request):
         "crispy": crispy_form
     })
 
+@csrf_exempt
 def mailing_factory_create(request):
     if request.method == 'POST':
         form = FileUploadForm(request.POST, request.FILES)
@@ -62,7 +64,7 @@ def mailing_factory_create(request):
 
 
 
-
+@csrf_exempt
 def mailing_factory_update(request, pk):
     mailing_factory = get_object_or_404(MailingFactory, pk=pk)
     if request.method == 'POST':
@@ -84,6 +86,7 @@ def mailing_factory_update(request, pk):
         return JsonResponse({'success': True, 'message': 'Mailing factory updated successfully.'})
     return JsonResponse({'success': False, 'message': 'Invalid request method.'})
 
+@csrf_exempt
 def mailing_factory_delete(request, pk):
     mailing_factory = get_object_or_404(MailingFactory, pk=pk)
     if request.method == 'POST':

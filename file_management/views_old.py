@@ -1,15 +1,18 @@
 # file_management/views.py
 
+from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from .forms import FileUploadForm
 from .models import FilesModel
 import os
 
+@csrf_exempt
 def list_files(request):
     files = FilesModel.objects.all()  # Recupera todos los archivos
     return render(request, 'file_management/list_files.html', {'files': files})
 
+@csrf_exempt
 def upload_file(request):
     if request.method == 'POST':
         form = FileUploadForm(request.POST, request.FILES)
@@ -30,6 +33,7 @@ def handle_uploaded_file(f):
         for chunk in f.chunks():
             destination.write(chunk)
 
+@csrf_exempt
 def download_file(request, file_id):
     file_instance = FilesModel.objects.get(id=file_id)
     file_path = 'uploads/' + file_instance.name
@@ -38,6 +42,7 @@ def download_file(request, file_id):
         response['Content-Disposition'] = 'attachment; filename=' + file_instance.name
         return response
 
+@csrf_exempt
 def delete_file(request, file_id):
     file_instance = FilesModel.objects.get(id=file_id)
     file_path = 'uploads/' + file_instance.name

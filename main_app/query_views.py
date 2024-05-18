@@ -34,6 +34,7 @@ data = [
     for i in range(100)  # 100 Filas de datos de ejemplo
 ]
 
+@csrf_exempt
 def fetch_data(request):
     draw = int(request.GET.get('draw', 1))
     start = int(request.GET.get('start', 0))
@@ -51,7 +52,7 @@ def fetch_data(request):
 def table_old(request):
     return render(request, 'datatables_base.html')
 
-
+@csrf_exempt
 def table(request):
     proc = process.objects.first()
     chat_history = proc.get_chat_history() if proc else []
@@ -235,6 +236,7 @@ def query_update(request, query_id):
         form = QueryForm(instance=query)
     return render(request, 'queries/form.html', {'form': form})
 
+@csrf_exempt
 def query_delete(request, query_id):
     query = Query.objects.get(id=query_id)
     if request.method == 'POST':
