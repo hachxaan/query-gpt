@@ -38,4 +38,4 @@ urlpatterns = [
 
 ]
 
-handler404 = 'main_app.views.error_404' 
+handler404 = 'main_app.query_views.redirect_to_home'
