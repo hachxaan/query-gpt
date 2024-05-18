@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 
 from .campaign_form import MailingCampaignForm
@@ -7,7 +8,7 @@ from .campaign_form import MailingCampaignForm
 from .models import MailingCampaign
 from crispy_forms.helper import FormHelper
 
-
+@login_required
 def mailing_campaign_list(request):
     mailing_campaigns = MailingCampaign.objects.all()
     campaign_count = mailing_campaigns.count()
@@ -23,7 +24,7 @@ def mailing_campaign_list(request):
         "campaign_count": campaign_count
     })
 
-
+@login_required
 def mailing_campaign_create(request):
     if request.method == 'POST':
         form = MailingCampaignForm(request.POST)
@@ -39,7 +40,7 @@ def mailing_campaign_create(request):
     # Si no es un POST o el formulario no es válido, vuelve a mostrar el formulario
     return render(request, 'list_campaing.html', {'form': form})
 
-
+@login_required
 def mailing_campaign_delete(request, pk):
     campaign = get_object_or_404(MailingCampaign, pk=pk)
     if request.method == 'POST':

@@ -49,7 +49,7 @@ def download_results(request, query_id):
         print(str(e))
         return render(request, 'error_template.html', {'error': str(e)})
 
-@csrf_exempt
+@login_required
 def query_list_download(request):
     print(".................................. Query List Download .................................. ")
     queries = Query.objects.all()

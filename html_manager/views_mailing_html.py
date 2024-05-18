@@ -2,7 +2,7 @@ import io
 from typing import Dict, List, Tuple
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404
-
+from django.contrib.auth.decorators import login_required
 from file_management.models import MailingFactory
 from html_manager.campaign_form import MailingCampaignForm
 from html_manager.html_factory import HTMLFactory
@@ -12,7 +12,7 @@ import csv
 from django.shortcuts import redirect
 
 
-
+@login_required
 def import_csv(request, pk, apply_permanent_images):
     if request.method == 'POST':
         csv_file = request.FILES.get('csvFile')
@@ -57,7 +57,7 @@ def import_csv(request, pk, apply_permanent_images):
         "crispy": crispy_form
     })
 
-
+@login_required
 def mailing_html_list_by_campaign(request, pk):
     mailing_campaign = get_object_or_404(MailingCampaign, pk=pk)
     mailing_htmls = MailingHTML.objects.filter(mailing_campaign=mailing_campaign) 
@@ -75,13 +75,13 @@ def mailing_html_list_by_campaign(request, pk):
     return JsonResponse(data_json, safe=False)
 
 
-
+@login_required
 def delete_mailing_html(request, pk):
     mailing_html = get_object_or_404(MailingHTML, pk=pk)
     mailing_html.delete()
     return redirect('mailing_campaign_list')
 
-
+@login_required
 def download_html(request, pk):
     mailing_html = get_object_or_404(MailingHTML, pk=pk)
     mailing_campaign = mailing_html.mailing_campaign
