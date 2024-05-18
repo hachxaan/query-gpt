@@ -1,11 +1,11 @@
 import json
 from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
 from .models import AllowedField, AllowedTable, Query, process
 from .forms import QueryForm
 from marketing_queries.settings import openai_adapter_get_query
 from marketing_queries.settings import openai_adapter_get_context
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 import random
 import string
 from django.db import connections
@@ -34,7 +34,7 @@ data = [
     for i in range(100)  # 100 Filas de datos de ejemplo
 ]
 
-@csrf_exempt
+@login_required
 def fetch_data(request):
     draw = int(request.GET.get('draw', 1))
     start = int(request.GET.get('start', 0))
@@ -52,7 +52,7 @@ def fetch_data(request):
 def table_old(request):
     return render(request, 'datatables_base.html')
 
-@csrf_exempt
+@login_required
 def table(request):
     proc = process.objects.first()
     chat_history = proc.get_chat_history() if proc else []
@@ -102,7 +102,7 @@ def validate_and_extract(s):
     except json.JSONDecodeError:
         return None
 
-@csrf_exempt
+@login_required
 def config_report(request):
     try:
         if request.method == 'POST':
@@ -164,7 +164,7 @@ def config_report(request):
         return JsonResponse({"error": "An unexpected error occurred: " + str(e)}, status=500)
 
 
-@csrf_exempt
+@login_required
 def get_query_from_gpt(request):
     try:
         if request.method == 'POST':
@@ -198,7 +198,7 @@ def get_query_from_gpt(request):
     except Exception as e:
         return JsonResponse({"error": "An unexpected error occurred: " + str(e)}, status=500)
 
-@csrf_exempt
+@login_required
 def query_list(request):
     queries = Query.objects.all()
     current_path = request.path
@@ -207,12 +207,12 @@ def query_list(request):
         'current_path': current_path  # Añadir la ruta actual al contexto
     })
 
-@csrf_exempt
+@login_required
 def query_detail(request, query_id):
     query = Query.objects.get(id=query_id)
     return render(request, 'queries/detail.html', {'query': query})
 
-@csrf_exempt
+@login_required
 def query_create(request):
     if request.method == 'POST':
         form = QueryForm(request.POST)
@@ -236,7 +236,7 @@ def query_update(request, query_id):
         form = QueryForm(instance=query)
     return render(request, 'queries/form.html', {'form': form})
 
-@csrf_exempt
+@login_required
 def query_delete(request, query_id):
     query = Query.objects.get(id=query_id)
     if request.method == 'POST':
