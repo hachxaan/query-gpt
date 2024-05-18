@@ -107,6 +107,8 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     'main_app.middleware.ExceptionMiddleware',
+    'django.middleware.common.BrokenLinkEmailsMiddleware',
+
 ]
 
 ROOT_URLCONF = "marketing_queries.urls"

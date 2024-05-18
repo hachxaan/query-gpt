@@ -1,3 +1,5 @@
+# marketing_queries/urls.py
+
 from django.urls import include, path
 
 from main_app import marketing_views, views
