@@ -1,0 +1,90 @@
+/* Estilos generales */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    margin: 0;
+    padding: 20px;
+}
+
+/* Estilos para el grid */
+.grid {
+    display: grid;
+    gap: 20px; /* Espacio entre elementos */
+}
+
+/* Ajustes específicos para el grid en diferentes tamaños de pantalla */
+@media (min-width: 768px) { /* Pantallas medianas (md) */
+    .md\:grid-cols-2 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1024px) { /* Pantallas grandes (lg) */
+    .lg\:gap-10 {
+        gap: 40px;
+    }
+}
+
+@media (min-width: 1280px) { /* Pantallas extra grandes (xl) */
+    .xl\:grid-cols-4 {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* Estilos para las tarjetas */
+.rounded-lg {
+    border-radius: 8px;
+}
+
+.overflow-hidden {
+    overflow: hidden;
+}
+
+.flex {
+    display: flex;
+    flex-direction: column;
+}
+
+.flex-1 {
+    flex: 1;
+}
+
+.border {
+    border: 1px solid #ddd;
+}
+
+.bg-card {
+    background-color: #ffffff; /* Fondo de la tarjeta */
+}
+
+.text-card-foreground {
+    color: #333333; /* Color del texto principal de la tarjeta */
+}
+
+.shadow-sm {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.p-6 {
+    padding: 24px;
+}
+
+.space-y-2 > * + * {
+    margin-top: 8px; /* Espacio entre elementos hijos */
+}
+
+.text-lg {
+    font-size: 1.125rem; /* 18px */
+}
+
+.font-semibold {
+    font-weight: 600;
+}
+
+.text-sm {
+    font-size: 0.875rem; /* 14px */
+}
+
+.text-gray-500 {
+    color: #6b7280;
+}

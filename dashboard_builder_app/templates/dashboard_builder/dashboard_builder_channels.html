@@ -1,0 +1,43 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Chatbot UI</title>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.4/css/jquery.dataTables.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.js"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+
+    <script src="http://127.0.0.1:8080/static/dashboard_builder/js/chat.js"></script>
+    <script src="http://127.0.0.1:8080/static/dashboard_builder/js/websocket.js"></script>
+    <link rel="stylesheet" type="text/css" href="http://127.0.0.1:8080/static/dashboard_builder/css/styles.css">
+
+    {% comment %} <script src="{% static 'dashboard_builder/js/chat.js' %}"></script>
+    <script src="{% static 'dashboard_builder/js/websocket.js' %}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'dashboard_builder/css/styles.css' %}"> {% endcomment %}
+    <script>
+        const dashboardUuid = "{{ dashboard_uuid }}";
+    </script>
+</head>
+<body>
+    <div id="wrapper">
+        <div id="cnt-table"></div>
+        <div id="cnt-chart"></div>
+    </div>
+    <div class="chat-container">
+        <div class="cnt-messages" id="cnt-messages">
+            {% for message in chat_history %}
+            <div class="message">
+                <p><strong>{{ message.sender }}:</strong> {{ message.text }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="chat-input">
+            <input type="text" placeholder="Escribe tu mensaje..." id="chat-input" value="Consultar usuarios inactivos, id, email y nombre">
+            <button type="submit" id="send-button">Enviar</button>
+        </div>
+    </div>
+</body>
+</html>

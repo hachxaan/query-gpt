@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Chatbot UI</title>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.4/css/jquery.dataTables.css">
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+        }
+        #wrapper {
+            position: absolute;
+            left: 0;
+            width: 80%;
+            height: 100%;
+            background-color: #fff;
+            overflow-y: auto;
+            padding: 20px;
+            box-sizing: border-box;
+            padding-top: 50px;
+        }
+        .chat-container {
+            position: fixed;
+            right: 0;
+            width: 20%;
+            height: 100%;
+            background-color: #f4f4f4;
+            border-left: 1px solid #ccc;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        #cnt-chart {
+            height: 400px;
+            margin-top: 20px;
+        }
+        .cnt-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        .chat-input {
+            display: flex;
+            align-items: center;
+            padding: 5px 10px;
+            background-color: #fff;
+            border-top: 1px solid #ccc;
+        }
+        .chat-input input {
+            flex: 1;
+            border: none;
+            padding: 10px;
+            margin-right: 10px;
+        }
+        .chat-input button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        .chat-input button:hover {
+            background-color: #0056b3;
+        }
+        .message {
+            padding: 10px;
+            border-bottom: 1px solid #e1e1e1;
+        }
+        .message p {
+            margin: 0 0 10px;
+        }
+        .message code {
+            display: block;
+            white-space: pre-wrap;
+            background-color: #f9f9f9;
+            padding: 10px;
+            border: 1px solid #e1e1e1;
+            border-radius: 4px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        #data-table td {
+            border-bottom: 1px solid #e1e1e1; /* Línea fina divisoria */
+        }
+    </style>
+</head>
+<body>
+<div id="wrapper">
+    <div id="cnt-table"></div>
+    <div id="cnt-chart"></div> 
+</div>
+<div class="chat-container">
+    <div class="cnt-messages" id="cnt-messages">
+
+        {% for message in chat_history %}
+        <div class="message">
+            <p><strong>{{ message.sender }}:</strong> {{ message.text }}</p>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="chat-input">
+        <input type="text" placeholder="Escribe tu mensaje..." id="chat-input" value="Consultar usuarios inactivos, id, email y nombre">
+        <button type="submit" id="send-button">Enviar</button>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" charset="utf8"
+        src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.js"></script>
+<script>
+
+    let username = '{{ user.username }}';
+
+    $(document).ready( function () {
+        {% comment %} $('#data-table').DataTable({
+            "bInfo" : true, // Desactiva la información de paginación
+            "paging": true, // Desactiva la paginación
+            "searching": true, // Desactiva la búsqueda
+            "ordering": true, // Activa el ordenamiento
+            "order": [[0, 'asc']] // Ordena inicialmente por la primera columna de forma ascendente
+        }); {% endcomment %}
+    } );
+    // Función para enviar mensaje
+    function sendMessage() {
+        let inputElem = $('#chat-input');
+        let message = inputElem.val().trim(); // Obtiene el mensaje del input
+        
+        if(message !== "") { // Verifica si el mensaje no está vacío
+            // Agrega el mensaje al chat
+            let messageHTML = `<div class="message"><p><strong>${username}:</strong> ${message}</p></div>`;
+            let chatMessages = $('#cnt-messages');
+            chatMessages.append(messageHTML);
+
+            // Realiza auto-scroll al final del chat
+            chatMessages.scrollTop(chatMessages[0].scrollHeight);
+
+            // Envía el mensaje mediante una petición POST
+            $.ajax({
+                type: "POST",
+                url: "chat/",
+                data: JSON.stringify({ prompt: message }), // Serializa el objeto de datos a una cadena JSON
+                contentType: "application/json; charset=utf-8", // Ajusta el tipo de contenido a JSON
+                dataType: "json", // Espera una respuesta en formato JSON
+                headers: { "X-CSRFToken": '{{ csrf_token }}' },
+                success: function(response) {
+                    // Agrega el mensaje al chat
+                    
+                    console.log(response)
+                    let messageHTML = `<div class="message"><p><strong>AI:</strong> (${response.code}) ${response.message}</p></div>`;
+                    let chatMessages = $('#cnt-messages');
+                    chatMessages.append(messageHTML);
+                    chatMessages.scrollTop(chatMessages[0].scrollHeight);    
+                },
+                error: function(error) {
+                    console.error("Error al enviar el mensaje", error);
+                }
+            });
+
+            inputElem.val(''); // Limpia el input
+        }
+    }
+
+    // Controlador de evento para el botón enviar
+    $('#send-button').click(sendMessage);
+
+    // Controlador de evento para la tecla Enter
+    $('#chat-input').keypress(function(e) {
+        if(e.which == 13) { // 13 es el código de la tecla Enter
+            sendMessage();
+            e.preventDefault(); // Previene la acción por defecto de la tecla Enter
+        }
+    });
+
+    Highcharts.chart('cnt-chart', {
+        chart: {
+            type: 'column'
+        },
+        title: {
+            text: 'Créditos otorgados en el último año agrupados por White Label'
+        },
+        xAxis: {
+            categories: ['abacus', 'multikrdcsv', 'assethr', 'test', 'insperity', 'pasaporte-migrante', 'payplus', 'kazpay']
+        },
+        yAxis: {
+            title: {
+                text: 'Cantidad de Créditos'
+            }
+        },
+        series: [{  
+            name: 'Recurrent Solid Credit',
+            data: [30, 0, 56, 50, 92, 0, 0, 23]
+        }, {
+            name: 'Recurrent Tabapay Credit',
+            data: [42, 0, 26, 0, 55, 50, 5, 30]
+        }, {
+            name: 'Regular ACH Credit',
+            data: [11, 0, 8, 0, 31, 4, 0, 13]
+        }, {
+            name: 'Regular Solid Credit',
+            data: [24, 0, 20, 16, 113, 13, 5, 24]
+        }, {
+            name: 'Regular Tabapay Credit',
+            data: [10, 0, 11, 3, 36, 4, 5, 9]
+        }]
+    });
+
+    (function() {
+        let chatMessages = $('#cnt-messages');
+        chatMessages.scrollTop(chatMessages[0].scrollHeight);
+    })();
+    
+    
+</script>
+</body>
+</html>

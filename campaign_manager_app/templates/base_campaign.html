@@ -1,0 +1,444 @@
+
+{% load crispy_forms_tags %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- SB Admin 2 CSS -->
+    <link href="https://startbootstrap.github.io/startbootstrap-sb-admin-2/css/styles.css" rel="stylesheet">
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css"/>
+    <!-- Bootstrap 4 CSS (Necesario para SB Admin 2) -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <!-- SB Admin 2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/startbootstrap-sb-admin-2@4.1.4/dist/css/sb-admin-2.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
+    
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.3.3/css/select.dataTables.min.css"/>
+
+    <title>HTML Manager</title>
+
+    <style>
+        th {
+            color: rgb(19, 19, 19) !important;
+        }
+        .btn-custom-color:hover {
+            background-color: rgb(193, 216, 47); /* Tu color de fondo específico */
+            color: white; /* Asegura legibilidad */
+            border-color: rgb(115, 193, 108) !important;
+        }
+
+        .btn-custom-color {
+            background-color: rgb(115, 193, 108); /* Color de fondo al pasar el mouse */
+            border-color: rgb(115, 193, 108); /* Borde al pasar el mouse */
+            border: 1px solid rgb(193, 216, 47); /* Borde del mismo color */
+        }
+            
+        .btn-primary.focus, .btn-primary:focus {
+            box-shadow: 0 0 0 0.0rem rgba(38,143,255,0);
+        }
+
+        .title-custom-color {
+            color: rgb(0, 164, 228) !important; 
+        }
+
+        .btn-eliminar {
+            color: #fff;
+            background-color: rgb(241, 100, 93) !important;
+            border-color: rgb(241, 100, 93) !important;
+        }
+
+        .btn-ver {
+            color: #fff;
+            background-color: rgb(0, 164, 228); 
+            border-color: rgb(0, 164, 228);
+        }
+
+        .btn-ver:hover {
+            color: #fff;
+            background-color: rgba(0, 164, 228, .8)!important; 
+            border-color: 1.6px solid rgb(0, 164, 228) !important;
+        }
+
+        .btn-descargar {
+            color: #fff;
+            background-color: rgba(253, 186, 99, .8);
+            border-color: rgb(253, 186, 99);
+        }
+        
+        .btn-descargar:hover {
+            color: #fff;
+            background-color: rgb(253, 186, 99);
+            border-color: rgb(253, 186, 99);
+        }
+            
+    </style>
+</head>
+
+<body>  
+    {% block content %}
+    
+    {% endblock %}
+
+    {% block content_htmls %}
+    
+    {% endblock %}
+    <!-- Image Modal -->
+    <div class="modal fade" id="imagenModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            <!-- La imagen se insertará dinámicamente aquí -->
+            <img src="" class="img-fluid" alt="Imagen Descriptiva" id="imagenDinamica">
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="createCampaignModal" tabindex="-1" role="dialog" aria-labelledby="createCampaignModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createCampaignModalLabel">Crear nuevo elemento</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Asegúrate de actualizar la acción del formulario según sea necesario -->
+                    <form method="post" action="{% url 'mailing_campaign_create' %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                    
+                        {{ form|crispy }}
+                        <button type="submit" class="btn btn-primary">Guardar</button>
+                    </form>
+                        
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="importModal" tabindex="-1" role="dialog" aria-labelledby="importModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="importModalLabel">Importar archivo CSV</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Add your import form here -->
+                    <form id="importForm" method="post" action="{% url 'import_csv' pk=0 apply_permanent_images=1 %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="csvFile">Archivo CSV</label>
+                            <input type="file" class="form-control-file" id="csvFile" name="csvFile" accept=".csv" onchange="enableButton()" value="">
+                        </div>
+                        
+                        <input type="checkbox" id="apply_permanent_images" name="apply_permanent_images"> Apply Permanent Images
+                        <button type="submit" class="btn btn-primary" id="importButton" disabled onclick="updateAction()">Importar</button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+<!-- Modal view HTML-->
+<div class="modal fade" id="viewModalHTML" tabindex="-1" role="dialog" aria-labelledby="viewModalHTMLLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document"> <!-- Puedes utilizar modal-lg para un tamaño más grande -->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewModalHTMLLabel">Preview</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" style="max-height: calc(100vh - 210px); overflow-y: auto;"> <!-- Ajusta la altura máxima y agrega desplazamiento -->
+                <div class="html-content">
+                    <!-- Tu contenido HTML aquí -->
+                </div>
+                <!-- Aquí se cargará el contenido HTML -->
+            </div>
+        </div>
+    </div>
+</div>
+
+        
+
+    <!-- Bootstrap core JavaScript-->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/select/1.3.3/js/dataTables.select.min.js"></script>
+    <!-- Bootstrap y jQuery -->
+
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
+   
+    
+    
+    
+    <!-- Core plugin JavaScript-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
+
+    <!-- SB Admin 2 custom scripts -->
+    <script src="https://startbootstrap.github.io/startbootstrap-sb-admin-2/js/scripts.js"></script>
+
+    <script>
+    var createUrl = "{% url 'mailing_campaign_create' %}";
+    var list_html = "{% url 'mailing_html_list_by_campaign' pk=0 %}";
+    var deleteCampaignUrl = "{% url 'mailing_campaign_delete' pk=0 %}"; 
+    var deleteHTMLUrl = "{% url 'delete_mailing_html' pk=0 %}"; 
+    var downloadHTML = "{% url 'download_html' pk=0 %}"; 
+    var selectedRows = localStorage.getItem('selectedRow');
+    var apply_permanent_images = localStorage.getItem('apply_permanent_images');
+
+
+    console.log('INIT', createUrl)
+
+    
+    {% if request.session.pk_delete %}
+        
+        console.log('------------- new_campaign_id', "{{ request.session.pk_delete }}");
+        var new_campaign_id = "{{ pk_delete }}";    
+    {% endif %}
+    var campaign_count = parseInt("{{ campaign_count }}");
+
+
+    function enableButton() {
+        var fileInput = document.getElementById("csvFile");
+        var importButton = document.getElementById("importButton");
+        
+        if (fileInput.files.length > 0) {
+            importButton.disabled = false;
+        } else {
+            importButton.disabled = true;
+        }
+    }
+
+    function updateAction() {
+
+        var baseUrl = "{% url 'import_csv' pk='9' apply_permanent_images='9999999999' %}";
+        var selectedRows = localStorage.getItem('selectedRow');
+        var applyPermanentImages = document.getElementById("apply_permanent_images").checked;
+        var applyPermanentImagesValue = applyPermanentImages ? '1' : '0'; 
+        var actionUrl = baseUrl.replace('9', selectedRows).replace('9999999999', applyPermanentImagesValue);
+    
+        $('#importForm').attr('action', actionUrl);
+    }
+
+    function deleteItem(pk) {
+        if (confirm('Are you sure you want to delete this item?')) {
+            $.ajax({
+                url: deleteCampaignUrl.replace('0', pk),
+                type: 'POST',
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    localStorage.removeItem('selectedRow');
+
+                    var table = $('#campaignTable').DataTable();
+                    // Utiliza el ID o alguna otra forma de identificar la fila única para eliminarla.
+                    $('button[data-id="' + pk + '"]').parents('tr').each(function(){
+                        table.row($(this)).remove().draw();
+                    });
+                    $('#htmlTable').DataTable().clear().draw(); 
+                },
+                error: function(xhr, status, error) {
+                    // Handle error response
+                    alert('An error occurred while deleting the item');
+                }
+            });
+        }
+    }
+
+    function trCampaignSelect(pk, apply_permanent_images) {
+        console.log('apply_permanent_images:-----', apply_permanent_images);
+        localStorage.setItem('selectedRow', pk);
+        localStorage.setItem('apply_permanent_images', apply_permanent_images);
+        get_html_list( pk);
+    }
+
+    function get_html_list(pk) {
+        if (campaign_count == 0) {
+            return;
+        }
+        $('#htmlTable').DataTable({
+            responsive: true,
+            autoWidth: false,
+            destroy: true,
+            stripeClasses: [],
+            deferRender: true,
+            ajax: {
+                url: list_html.replace('0', pk),
+                type: 'GET',
+                beforeSend: function(request) {
+                    request.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+                },
+                dataSrc: function(json) {
+                    // Aquí puedes verificar si la data es un array vacío
+                    if (json && json.length === 0) {
+                        // Si es un array vacío, puedes manejarlo como prefieras
+                        // Por ejemplo, mostrar un mensaje, cargar datos por defecto, etc.
+                        console.log('No hay datos disponibles');
+                        // Asegúrate de retornar algo que DataTables pueda manejar, como un array vacío
+                        return [];
+                    }
+                    // Si no, solo retorna la data para que DataTables la procese
+                    return json;
+                },
+                error: function(xhr, error, thrown) { // Manejador de errores
+                    // Aquí puedes manejar cómo responder al error
+                    // Por ejemplo, mostrar un mensaje de error personalizado
+                    if(xhr.status === 404) {
+                        // Especifica una acción para el código de estado 404
+                        
+                        return [];
+                    } else {
+                        // Acción por defecto para otros códigos de error
+                        return [];
+                    }
+                }
+            },
+            columns: [
+                {"data": "id"},
+                {"data": "white_label"},
+                {
+                    "data": null,
+                    "render": function(data, type, row) {
+                        return "<button class='btn btn-primary btn-descargar' style='margin-right: 10px;'><i class='fas fa-download'></i></button>" +
+                               "<button class='btn btn-info btn-ver' style='margin-right: 10px;'><i class='fas fa-eye'></i></button>" +
+                               "<button id='btn-eliminar-" + data.id + "' class='btn btn-danger btn-eliminar'><i class='fas fa-trash custom-trash-icon'></i></button>";
+                    }
+                }
+            ],
+            initComplete: function (settings, json) {
+                $('#htmlTable tbody').off('click', '.btn-descargar').on('click', '.btn-descargar', function () {
+                    var data = $('#htmlTable').DataTable().row($(this).parents('tr')).data();
+                    // Aquí puedes implementar la lógica de descarga, por ejemplo:
+                    console.log('Descargar', data.id);
+                    window.location.href = downloadHTML + data.id;
+                });
+
+                $('#htmlTable tbody').off('click', '.btn-ver').on('click', '.btn-ver', function () {
+                    var data = $('#htmlTable').DataTable().row($(this).parents('tr')).data();
+                    // Aquí puedes implementar la lógica para ver detalles, por ejemplo:
+                    console.log('HTML', data.html_content); 
+                    $('#viewModalHTML .modal-body').html(data.html_content);
+                    // Mostrar el modal
+                    $('#viewModalHTML').modal('show');
+                });
+
+                $('#htmlTable tbody').off('click', '.btn-eliminar').on('click', '.btn-eliminar', function () {
+                    var btnId = this.id; // Obtienes el id del botón que fue clickeado
+                    var registroId = btnId.replace('btn-eliminar-', '');
+
+                    var tr = $(this).closest('tr'); // Obtener la fila (tr) antes de la solicitud AJAX
+                    var data = $('#htmlTable').DataTable().row(tr).data(); // Obtener los datos de la fila
+                    var id = data.id;
+                    console.log('Eliminar: ', id);
+                    if (confirm('Are you sure you want to delete this item?')) {
+                        $.ajax({
+                            url: deleteHTMLUrl.replace('0', data.id),
+                            type: 'POST',
+                            data: {
+                                csrfmiddlewaretoken: '{{ csrf_token }}'
+                            },
+                            beforeSend: function(xhr, settings) {
+                                // Configura correctamente el token CSRF
+                                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+                            },
+                            success: function(response) {
+                                $('#htmlTable').DataTable().row(tr).remove().draw();
+                            },
+                            error: function(xhr, status, error) {
+                                // Manejar respuesta de error
+                                alert('An error occurred while deleting the item');
+                            }
+                        });
+                    }   
+                });
+
+            }
+        });
+    }
+    
+
+    $(document).ready(function() {
+
+        $('.ver-imagen-btn').click(function(){
+            var imagenUrl = $(this).attr('data-imagen-url'); // Obtén la URL de la imagen
+            $('#imagenDinamica').attr('src', imagenUrl); // Establece la URL de la imagen en el modal
+        });
+       
+        var campaignTable = $('#campaignTable').DataTable({
+            "paging": true,
+            "ordering": true,
+            "info": true,
+            "searching": true,
+            "select": {
+                "style": "single"
+            },
+            "stateSave": true,
+        });
+
+        // Restaurar la selección
+        if (selectedRows) {
+            campaignTable.rows().deselect();
+            campaignTable.rows().every(function() {
+                var data = this.data();
+                if ( String(data[0]) == String(selectedRows)) {
+                    this.select();
+                }
+            });
+            get_html_list(selectedRows)
+        }
+
+        $('#create').click(function() {
+            window.location.href = createUrl;
+        });
+
+        $('#importModal').on('show.bs.modal', function(event) {
+            var apply_permanent_images = localStorage.getItem('apply_permanent_images');            
+            $('#apply_permanent_images').prop('checked', apply_permanent_images === 'true');
+            $('#csvFile').val('');
+            $('#importButton').prop('disabled', true);
+        });
+
+
+    });
+    function getCookie(name) {
+        'use strict';
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+
+    
+</body>
+
+</html>

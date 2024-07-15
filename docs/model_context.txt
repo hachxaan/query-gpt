@@ -1,0 +1,45 @@
+
+# Contextualización del Modelo de Entrenamiento
+
+## Datos
+
+### MailingFactory
+- id: Identificación primaria del registro.
+- white_label: Etiqueta blanca asociada al mailing.
+- name: Nombre único del mailing.
+- type: Tipo de mailing (e.g., header, footer).
+- campaign: Campaña a la que pertenece el mailing.
+- permanent: Indica si el mailing es permanente.
+- file_name: Nombre del archivo asociado al mailing.
+- href: Enlace del archivo.
+- extension: Extensión del archivo.
+- created_at: Fecha de creación del registro.
+- order: Orden del mailing basado en su tipo.
+
+### MailingCampaign
+- id: Identificación primaria de la campaña.
+- name: Nombre de la campaña de mailing.
+- description: Descripción de la campaña.
+- apply_permanent_images: Indica si se deben aplicar imágenes permanentes en la campaña.
+- created_at: Fecha de creación de la campaña.
+- updated_at: Fecha de última actualización de la campaña.
+
+### MailingHTML
+- id: Identificación primaria del contenido HTML.
+- mailing_campaign: Relación con la campaña de mailing.
+- white_label: Etiqueta blanca asociada al contenido HTML.
+- csv_data: Datos en formato CSV asociados al contenido HTML.
+- html_content: Contenido HTML de la campaña.
+- created_at: Fecha de creación del contenido HTML.
+- updated_at: Fecha de última actualización del contenido HTML.
+
+## Uso en el Modelo de Entrenamiento
+
+Estos datos pueden ser utilizados para entrenar un modelo de aprendizaje automático que prediga el éxito de una campaña de mailing basada en características como el tipo de mailing, el nombre de la campaña, y el contenido HTML. El modelo puede ser entrenado utilizando técnicas de procesamiento de texto y análisis de datos para extraer características significativas de los datos CSV y el contenido HTML.
+
+### Características Relevantes
+- Tipo y orden del mailing.
+- Nombre y descripción de la campaña.
+- Contenido y estructura del HTML.
+- Datos CSV asociados al HTML.
+
