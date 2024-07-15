@@ -3,7 +3,6 @@
 import re
 from django.db import models
 import sqlparse
-from login_app.models import User
 from query_builder_app.models.allow_fields import AllowedField
 from query_builder_app.models.allow_tables import AllowedTable
 from query_builder_app.utils.fernet import FernetSingleton
