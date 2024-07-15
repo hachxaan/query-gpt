@@ -17,7 +17,7 @@ StandardError=journal
 
 WorkingDirectory=/home/administrador/microservices/microservice-backoffice
 Environment="PATH=/home/administrador/microservices/microservice-backoffice/venv/bin"
-Environment="DJANGO_SETTINGS_MODULE=marketing_queries.settings"
+Environment="DJANGO_SETTINGS_MODULE=backoffice.settings"
 ExecStart=/home/administrador/microservices/microservice-backoffice/venv/bin/uwsgi --ini backoffice-beta.ini
 
 [Install]
