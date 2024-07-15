@@ -154,3 +154,6 @@ $RECYCLE.BIN/
 *~ 
 .env
 backoffice.zip
+*.zip
+*.csv
+uploads/
