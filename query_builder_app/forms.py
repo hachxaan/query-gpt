@@ -1,6 +1,7 @@
 from django import forms
-from .models import Query, User
 
+from login_app.models import User
+from .models import Query
 
 class QueryForm(forms.ModelForm):
 
