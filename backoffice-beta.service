@@ -1,0 +1,24 @@
+[Unit]
+Description=Backoffice Beta
+Requires=network.target
+After=network.target
+After=syslog.target
+
+[Service]
+TimeoutStartSec=0
+RestartSec=7
+Restart=always
+User=administrador
+KillSignal=SIGTERM
+Type=notify
+NotifyAccess=all
+StandardOutput=journal
+StandardError=journal
+
+WorkingDirectory=/home/administrador/microservices/microservice-backoffice
+Environment="PATH=/home/administrador/microservices/microservice-backoffice/venv/bin"
+Environment="DJANGO_SETTINGS_MODULE=marketing_queries.settings"
+ExecStart=/home/administrador/microservices/microservice-backoffice/venv/bin/uwsgi --ini backoffice-beta.ini
+
+[Install]
+WantedBy=multi-user.target
