@@ -24,6 +24,9 @@ replacements = {
 class Query(models.Model):
     class Meta:
         db_table = 'query'
+        permissions = [("execute_query", "Can execute queries")]
+        unique_together = ("table", "name")
+
 
     id = models.AutoField(primary_key=True)
     title = models.CharField(db_column='title', max_length=64, blank=True, null=False) 
@@ -33,9 +36,6 @@ class Query(models.Model):
     created_date = models.DateTimeField(auto_now_add=True)
     sql_query = models.TextField()
     is_public = models.BooleanField(default=False)
-
-    class Meta:
-        permissions = [("execute_query", "Can execute queries")]
 
     def __str__(self):
         return self.title
