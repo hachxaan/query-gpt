@@ -1,3 +1,5 @@
+# backoffice/db_router.py
+
 class AppRouter:
     app_label_to_db = {
         'query_builder_app': 'query_builder_app_db',
