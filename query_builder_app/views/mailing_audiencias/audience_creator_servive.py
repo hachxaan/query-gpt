@@ -88,10 +88,10 @@ def create_directory(directory_name):
             if file.endswith(".csv"):
                 os.remove(os.path.join(directory_name, file))
 
-def save_file(file, temp_file_name, file_name_prefix, record_count, directory_name, files_generated):
+def save_file(csv_writer, temp_file_name, file_name_prefix, record_count, directory_name, files_generated):
     """Close and rename the temporary CSV file."""
-    if file:
-        file.close()
+    if csv_writer:
+        csv_writer.writerows([])
         final_file_name = os.path.join(directory_name, f"{file_name_prefix}_{record_count}.csv")
         os.rename(temp_file_name, final_file_name)
         print(f"Saved {final_file_name}")
@@ -101,6 +101,7 @@ def process_rows(rows, columns, directory_name):
     """Process database rows and save them into CSV files."""
     current_file_name = ""
     csv_writer = None
+    temp_file_name = None  # Initialize temp_file_name
     record_count = 0
     files_generated = []
 
@@ -115,7 +116,8 @@ def process_rows(rows, columns, directory_name):
         file_name = row[-1]
         
         if current_file_name != file_name:
-            save_file(csv_writer, temp_file_name, file_name_prefix, record_count, directory_name, files_generated)
+            if csv_writer:  # Ensure this is not the first iteration
+                save_file(csv_writer, temp_file_name, file_name_prefix, record_count, directory_name, files_generated)
 
             current_file_name = file_name
             record_count = 0
@@ -129,7 +131,8 @@ def process_rows(rows, columns, directory_name):
         csv_writer.writerow(row_data)
         record_count += 1
 
-    save_file(csv_writer, temp_file_name, file_name_prefix, record_count, directory_name, files_generated)
+    if csv_writer:
+        save_file(csv_writer, temp_file_name, file_name_prefix, record_count, directory_name, files_generated)
 
     return files_generated
 
