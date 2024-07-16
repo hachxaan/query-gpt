@@ -23,7 +23,7 @@ replacements = {
 
 class Query(models.Model):
     class Meta:
-        db_table = 'query'
+        # db_table = 'query'
         permissions = [("execute_query", "Can execute queries")]
         unique_together = ("table", "name")
 
