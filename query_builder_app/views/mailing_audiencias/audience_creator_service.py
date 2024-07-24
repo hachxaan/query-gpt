@@ -18,6 +18,9 @@ DB_HOST = os.getenv('POSTGRES_DNS')
 DB_PORT = os.getenv('POSTGRES_PORT')
 DB_KEY = os.getenv('DB_KEY')
 
+
+
+
 class FernetSingleton:
     """Singleton class for Fernet decryption."""
     
@@ -53,28 +56,18 @@ def execute_query(cursor, query):
     cursor.execute(query)
     return cursor.fetchall(), [desc[0] for desc in cursor.description]
 
-def is_base64(s):
-    """Check if a string is base64 encoded."""
-    try:
-        if isinstance(s, str):
-            s_bytes = s.encode('utf-8')
-        elif isinstance(s, memoryview):
-            s_bytes = s.tobytes()
-        else:
-            s_bytes = s
-        base64.urlsafe_b64decode(s_bytes)
-        return True
-    except Exception:
-        return False
-
 def decrypt_value(value, row_number, field_name):
     """Decrypt a base64 encoded value using Fernet."""
     try:
-        # if is_base64(value):
-        return fernet.decrypt(value).decode("utf-8")
-        # else:
-        #     print(f"Invalid base64 for {field_name} in row {row_number}: {value}")
-        #     return None
+        if isinstance(value, memoryview):
+            value = value.tobytes()
+        if isinstance(value, bytes):
+            return fernet.decrypt(value).decode("utf-8")
+        elif isinstance(value, str):
+            value_bytes = base64.urlsafe_b64decode(value)
+            return fernet.decrypt(value_bytes).decode("utf-8")
+        else:
+            raise ValueError("Unsupported value type for decryption")
     except Exception as e:
         print(f"Error decrypting {field_name} in row {row_number}: {e}")
         return None
