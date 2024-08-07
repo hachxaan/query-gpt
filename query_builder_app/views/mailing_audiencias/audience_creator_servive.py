@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 import base64
 from datetime import datetime
 import zipfile
+import re
 
 # Load environment variables from the .env file
 load_dotenv()
@@ -88,11 +89,16 @@ def create_directory(directory_name):
             if file.endswith(".csv"):
                 os.remove(os.path.join(directory_name, file))
 
+def sanitize_filename(filename):
+    """Sanitize the filename by removing or replacing special characters."""
+    return re.sub(r'[^\w\s-]', '', filename)
+
 def save_file(csv_writer, temp_file_name, file_name_prefix, record_count, directory_name, files_generated):
     """Close and rename the temporary CSV file."""
     if csv_writer:
         csv_writer.writerows([])
-        final_file_name = os.path.join(directory_name, f"{file_name_prefix}_{record_count}.csv")
+        sanitized_file_name = sanitize_filename(file_name_prefix)
+        final_file_name = os.path.join(directory_name, f"{sanitized_file_name}_{record_count}.csv")
         os.rename(temp_file_name, final_file_name)
         print(f"Saved {final_file_name}")
         files_generated.append(final_file_name)
@@ -122,7 +128,8 @@ def process_rows(rows, columns, directory_name):
             current_file_name = file_name
             record_count = 0
             file_name_prefix = file_name.rsplit('_', 1)[0] if file_name else "202407_unknown"
-            temp_file_name = os.path.join(directory_name, f"{file_name_prefix}_temp.csv")
+            sanitized_file_name_prefix = sanitize_filename(file_name_prefix)
+            temp_file_name = os.path.join(directory_name, f"{sanitized_file_name_prefix}_temp.csv")
             file = open(temp_file_name, mode='w', newline='', encoding='utf-8')
             csv_writer = csv.writer(file)
             csv_writer.writerow(columns[:-1])  # Exclude "file_name"
