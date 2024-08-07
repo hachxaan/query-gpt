@@ -3,7 +3,7 @@
 from django.http import HttpResponse, FileResponse
 from django.views import View
 import os
-from .audience_creator_servive import generate_csv_files
+from .audience_creator_service import generate_csv_files
 
 class GenerateAndDownloadCSVAudiencesView(View):
     def get(self, request, *args, **kwargs):
