@@ -1,3 +1,5 @@
+# query_builder_app/views/query_list.py
+ 
 import json
 import os
 from django.shortcuts import render
@@ -15,17 +17,21 @@ from django.http import JsonResponse
 
 openai_adapter_get_query = OpenAIAPIQueryAdapter(os.getenv("OPENAI_API_KEY"))
 
-@csrf_exempt
+@login_required
 def query_list(request):
-    if request.user.is_superuser:
+    user = request.user
+
+    if user.role == 'AdminMultikrd':
         queries = Query.objects.all()
+    elif user.role in ['AdminMarketing', 'UserMarketing']:
+        queries = Query.objects.filter(Q(author_id=user.id) | Q(is_public=True))
     else:
-        queries = Query.objects.filter(Q(author_id=request.user_id) | Q(is_public=True))
+        queries = Query.objects.none()
 
     current_path = request.path
     return render(request, 'queries/list.html', {
         'queries': queries,
-        'current_path': current_path  # Añadir la ruta actual al contexto
+        'current_path': current_path
     })
 
 

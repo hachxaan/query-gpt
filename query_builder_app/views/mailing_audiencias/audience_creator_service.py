@@ -169,7 +169,7 @@ def generate_csv_files():
     "Card Number", 
     "Company Name",
     "file_name"
-    FROM vw_mailings_v1
+    FROM vw_mailings_v2
     ORDER BY "file_name"
     """
 
