@@ -1,8 +1,7 @@
-# query_builder_app/views/banking/card_report_view.py
-
 from django.http import HttpResponse, FileResponse
 from django.views import View
 import os
+import traceback
 from .card_report_service import generate_csv_card_report
 
 class GenerateAndDownloadCSVCardsView(View):
