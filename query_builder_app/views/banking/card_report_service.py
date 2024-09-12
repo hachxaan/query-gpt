@@ -89,67 +89,100 @@ def decrypt_value(value, row_number, field_name):
 
 def compress_files(directory_name):
     """Compress all CSV files in the directory into a single zip file."""
-    zip_file_path = os.path.join(directory_name, f"{directory_name}.zip")
+    zip_file_path = os.path.join(directory_name, f"card_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.zip")
+    print(f"Creating zip file: {zip_file_path}")
     with zipfile.ZipFile(zip_file_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
         for root, _, files in os.walk(directory_name):
             for file in files:
                 if file.endswith('.csv'):
-                    zipf.write(os.path.join(root, file), arcname=file)
+                    file_path = os.path.join(root, file)
+                    print(f"Adding file to zip: {file_path}")
+                    zipf.write(file_path, arcname=file)
+    print(f"Zip file created successfully: {zip_file_path}")
     return zip_file_path
 
 def generate_csv_card_report():
     # Create a temporary directory
     temp_dir = tempfile.mkdtemp(prefix='card_report_')
+    print(f"Temporary directory created: {temp_dir}")
     csv_file_path = os.path.join(temp_dir, 'card_report.csv')
+    print(f"CSV file path: {csv_file_path}")
 
-    # Get data from banking_relations database
-    conn_banking = create_db_connection(db_config_banking_relations)
-    cursor_banking = conn_banking.cursor()
-    banking_data, banking_columns = execute_query(cursor_banking, query_banking_relations)
+    try:
+        # Get data from banking_relations database
+        conn_banking = create_db_connection(db_config_banking_relations)
+        cursor_banking = conn_banking.cursor()
+        banking_data, banking_columns = execute_query(cursor_banking, query_banking_relations)
+        print(f"Retrieved {len(banking_data)} records from banking_relations")
 
-    # Get data from platform database
-    conn_platform = create_db_connection(db_config_platform)
-    cursor_platform = conn_platform.cursor()
-    platform_data, platform_columns = execute_query(cursor_platform, query_platform)
+        # Get data from platform database
+        conn_platform = create_db_connection(db_config_platform)
+        cursor_platform = conn_platform.cursor()
+        platform_data, platform_columns = execute_query(cursor_platform, query_platform)
+        print(f"Retrieved {len(platform_data)} records from platform")
 
-    # Create a dictionary to store platform data keyed by user_id
-    platform_dict = {row[0]: row for row in platform_data}
+        # Create a dictionary to store platform data keyed by user_id
+        platform_dict = {row[0]: row for row in platform_data}
+        print(f"Created platform dictionary with {len(platform_dict)} entries")
 
-    # Combine data and write to CSV
-    with open(csv_file_path, 'w', newline='') as csvfile:
-        csvwriter = csv.writer(csvfile)
-        
-        # Write header
-        header = banking_columns + [col for col in platform_columns if col != 'user_id']
-        csvwriter.writerow(header)
-
-        # Write data rows
-        for row_num, banking_row in enumerate(banking_data, start=1):
-            user_id = banking_row[2]  # Assuming user_id is at index 2 in banking_relations
-            platform_row = platform_dict.get(user_id)
+        # Combine data and write to CSV
+        records_processed = 0
+        with open(csv_file_path, 'w', newline='', encoding='utf-8') as csvfile:
+            csvwriter = csv.writer(csvfile)
             
-            if platform_row:
-                combined_row = list(banking_row)
-                for i, value in enumerate(platform_row[1:], start=len(banking_columns)):
-                    column_name = platform_columns[i]
-                    if column_name.startswith('_'):
-                        decrypted_value = decrypt_value(value, row_num, column_name)
-                        combined_row.append(decrypted_value)
-                    else:
-                        combined_row.append(value)
+            # Write header
+            header = banking_columns + [col for col in platform_columns if col != 'user_id']
+            csvwriter.writerow(header)
+            print(f"CSV header written: {', '.join(header)}")
+
+            # Write data rows
+            for row_num, banking_row in enumerate(banking_data, start=1):
+                user_id = banking_row[2]  # Assuming user_id is at index 2 in banking_relations
+                platform_row = platform_dict.get(user_id)
                 
-                csvwriter.writerow(combined_row)
+                if platform_row:
+                    combined_row = list(banking_row)
+                    for i, value in enumerate(platform_row[1:], start=len(banking_columns)):
+                        column_name = platform_columns[i]
+                        if column_name.startswith('_'):
+                            decrypted_value = decrypt_value(value, row_num, column_name)
+                            combined_row.append(decrypted_value)
+                        else:
+                            combined_row.append(value)
+                    
+                    csvwriter.writerow(combined_row)
+                    records_processed += 1
+                    
+                    if records_processed % 1000 == 0:
+                        print(f"Processed {records_processed} records")
 
-    # Close database connections
-    cursor_banking.close()
-    conn_banking.close()
-    cursor_platform.close()
-    conn_platform.close()
+        print(f"Total records processed and written to CSV: {records_processed}")
 
-    # Compress the CSV file
-    zip_file_path = compress_files(temp_dir)
+        # Close database connections
+        cursor_banking.close()
+        conn_banking.close()
+        cursor_platform.close()
+        conn_platform.close()
+        print("Database connections closed")
 
-    # Remove the temporary CSV file
-    os.remove(csv_file_path)
+        # Compress the CSV file
+        zip_file_path = compress_files(temp_dir)
+        print(f"Compression completed. Zip file path: {zip_file_path}")
 
-    return zip_file_path
+        # Verify the zip file
+        if os.path.exists(zip_file_path) and os.path.getsize(zip_file_path) > 0:
+            print(f"Zip file verified: {zip_file_path}")
+            print(f"Zip file size: {os.path.getsize(zip_file_path)} bytes")
+        else:
+            print("Error: Zip file not created or empty")
+
+        # Remove the temporary CSV file
+        os.remove(csv_file_path)
+        print(f"Temporary CSV file removed: {csv_file_path}")
+
+        return zip_file_path
+
+    except Exception as e:
+        print(f"Error in generate_csv_card_report: {str(e)}")
+        raise
+
