@@ -10,6 +10,7 @@ import csv
 import tempfile
 import zipfile
 from datetime import datetime
+import shutil
 import logging
 
 logger = logging.getLogger(__name__)
@@ -300,3 +301,11 @@ def generate_csv_card_report():
         logger.error(f"Error in generate_csv_card_report: {str(e)}", exc_info=True)
         raise
 
+def cleanup_temp_files(temp_dir):
+    """Clean up temporary files and directories."""
+    try:
+        if os.path.exists(temp_dir):
+            shutil.rmtree(temp_dir)
+            logger.info(f"Temporary directory removed: {temp_dir}")
+    except Exception as e:
+        logger.error(f"Error removing temporary directory: {str(e)}")
