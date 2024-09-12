@@ -87,13 +87,20 @@ def decrypt_value(value, row_number, field_name):
         print(f"Error decrypting {field_name} in row {row_number}: {e}")
         return None
 
-
+def compress_files(directory_name):
+    """Compress all CSV files in the directory into a single zip file."""
+    zip_file_path = os.path.join(directory_name, f"{directory_name}.zip")
+    with zipfile.ZipFile(zip_file_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for root, _, files in os.walk(directory_name):
+            for file in files:
+                if file.endswith('.csv'):
+                    zipf.write(os.path.join(root, file), arcname=file)
+    return zip_file_path
 
 def generate_csv_card_report():
-    # Create temporary files
-    temp_dir = tempfile.mkdtemp()
+    # Create a temporary directory
+    temp_dir = tempfile.mkdtemp(prefix='card_report_')
     csv_file_path = os.path.join(temp_dir, 'card_report.csv')
-    zip_file_path = os.path.join(temp_dir, f'card_report_{datetime.now().strftime("%Y%m%d_%H%M%S")}.zip')
 
     # Get data from banking_relations database
     conn_banking = create_db_connection(db_config_banking_relations)
@@ -139,9 +146,8 @@ def generate_csv_card_report():
     cursor_platform.close()
     conn_platform.close()
 
-    # Create ZIP file
-    with zipfile.ZipFile(zip_file_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
-        zipf.write(csv_file_path, os.path.basename(csv_file_path))
+    # Compress the CSV file
+    zip_file_path = compress_files(temp_dir)
 
     # Remove the temporary CSV file
     os.remove(csv_file_path)
