@@ -7,6 +7,7 @@
         <a href="{% url 'query_list_download' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'query_list_download' %}active{% else %}bg-light{% endif %}">Download Queries</a>
         <a href="{% url 'query_list' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'query_list' %}active{% else %}bg-light{% endif %}">Queries Manager</a>
         <a href="{% url 'audiences' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'audiences' %}active{% else %}bg-light{% endif %}">Audiences</a>
+        <a href="{% url 'banking' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'banking' %}active{% else %}bg-light{% endif %}">Banking</a>
     </div>
 </div>
 <!-- /#sidebar-wrapper -->

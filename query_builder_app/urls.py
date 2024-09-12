@@ -21,9 +21,12 @@ urlpatterns = [
 
     path("api/download_results/<int:query_id>/", download_results, name="download_results"),
 
-    path('generate-csv-cards/', GenerateAndDownloadCSVCardsView.as_view(), name='generate_csv_cards'),
+    
     path('generate-csv-audiences/', GenerateAndDownloadCSVAudiencesView.as_view(), name='generate_csv_audiences'),
     path('audiences/', TemplateView.as_view(template_name='queries/audiences.html'), name='audiences'),
+    
+    path('generate-csv-cards/', GenerateAndDownloadCSVCardsView.as_view(), name='generate_csv_cards'),
+    path('banking/', TemplateView.as_view(template_name='queries/banking-reports.html'), name='banking'),
 ]
 
 

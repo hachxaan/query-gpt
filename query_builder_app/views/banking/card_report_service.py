@@ -1,3 +1,5 @@
+# query_builder_app/views/banking/card_report_service.py
+ 
 import os
 import psycopg2
 from cryptography.fernet import Fernet

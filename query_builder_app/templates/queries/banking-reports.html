@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Begin Page Content -->
+<div class="d-flex" id="wrapper">
+  <!-- Sidebar -->
+  {% include 'queries/menu-querys.html' %}
+
+  <!-- Page Content -->
+  <div id="page-content-wrapper">
+    <div class="container-fluid">
+      <h1 class="mt-4">Banking</h1>
+      <p>
+        <a href="{% url 'generate_csv_cards' %}" class="btn btn-primary" role="button">
+          Merge Solid Cards with Platform Users
+        </a>
+      </p>
+
+      <!-- Future options go here -->
+      <div class="future-options">
+        <!-- Placeholder for future options -->
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
