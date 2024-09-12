@@ -1,17 +1,12 @@
-# query_builder_app/views/banking/card_report_service.py
-
-
 import os
 import psycopg2
 from cryptography.fernet import Fernet
 from dotenv import load_dotenv
 import base64
 import csv
-import tempfile
-import zipfile
 from datetime import datetime
-import shutil
 import logging
+import tempfile
 
 logger = logging.getLogger(__name__)
 
@@ -36,10 +31,162 @@ db_config_platform = {
     'port': os.getenv('PORT_PLATFORM')
 }
 
-
 DB_KEY = os.getenv('DB_KEY')
 
-# Definir las consultas SQL aquí
+class FernetSingleton:
+    """Singleton class for Fernet decryption."""
+    
+    class __FernetSingleton:
+        def __init__(self):
+            key_bytes = DB_KEY.encode('utf-8')
+            self.fernet = Fernet(key_bytes)
+    
+    instance = None
+
+    def __init__(self):
+        if not FernetSingleton.instance:
+            FernetSingleton.instance = FernetSingleton.__FernetSingleton().fernet
+
+    def __getattr__(self, name):
+        return getattr(self.instance, name)
+
+# Initialize Fernet singleton
+fernet = FernetSingleton()
+
+def create_db_connection(db_config):
+    """Create and return a database connection."""
+    logger.info(f"Connecting to database: {db_config['dbname']} on {db_config['host']}:{db_config['port']}")
+    return psycopg2.connect(
+        dbname=db_config['dbname'],
+        user=db_config['user'],
+        password=db_config['password'],
+        host=db_config['host'],
+        port=db_config['port']
+    )
+
+def execute_query(cursor, query):
+    """Execute the given SQL query and return the results."""
+    cursor.execute(query)
+    return cursor.fetchall(), [desc[0] for desc in cursor.description]
+
+def decrypt_value(value, row_number, field_name):
+    """Decrypt a base64 encoded value using Fernet."""
+    try:
+        if value is None:
+            return None
+        if isinstance(value, memoryview):
+            value = value.tobytes()
+        if isinstance(value, bytes):
+            return fernet.decrypt(value).decode("utf-8")
+        elif isinstance(value, str):
+            value_bytes = base64.urlsafe_b64decode(value)
+            return fernet.decrypt(value_bytes).decode("utf-8")
+        else:
+            logger.warning(f"Unsupported value type for decryption in {field_name}, row {row_number}: {type(value)}")
+            return str(value)
+    except Exception as e:
+        logger.error(f"Error decrypting {field_name} in row {row_number}: {e}")
+        return str(value)
+
+def generate_csv_card_report():
+    temp_dir = '/home/administrador/temp-files'
+    if not os.access(temp_dir, os.W_OK):
+        logger.warning(f"No write access to {temp_dir}. Using system temp directory.")
+        temp_dir = tempfile.gettempdir()
+    
+    os.makedirs(temp_dir, exist_ok=True)
+    logger.info(f"Using directory: {temp_dir}")
+    
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    csv_file_path = os.path.join(temp_dir, f'card_report_{timestamp}.csv')
+    
+    logger.info(f"CSV file path: {csv_file_path}")
+
+    try:
+        # Get data from banking_relations database
+        logger.info("Connecting to banking_relations database...")
+        conn_banking = create_db_connection(db_config_banking_relations)
+        cursor_banking = conn_banking.cursor()
+        banking_data, banking_columns = execute_query(cursor_banking, query_banking_relations)
+        logger.info(f"Retrieved {len(banking_data)} records from banking_relations")
+
+        # Get data from platform database
+        logger.info("Connecting to platform database...")
+        conn_platform = create_db_connection(db_config_platform)
+        cursor_platform = conn_platform.cursor()
+        platform_data, platform_columns = execute_query(cursor_platform, query_platform)
+        logger.info(f"Retrieved {len(platform_data)} records from platform")
+
+        # Create a dictionary to store platform data keyed by user_id
+        platform_dict = {row[0]: row for row in platform_data}
+        logger.info(f"Created platform dictionary with {len(platform_dict)} entries")
+
+        # Combine data and write to CSV
+        records_processed = 0
+        with open(csv_file_path, 'w', newline='', encoding='utf-8') as csvfile:
+            csvwriter = csv.writer(csvfile)
+            
+            # Write header
+            header = banking_columns + [col for col in platform_columns if col != 'user_id']
+            csvwriter.writerow(header)
+            logger.info(f"CSV header written: {', '.join(header)}")
+
+            # Write data rows
+            for row_num, banking_row in enumerate(banking_data, start=1):
+                try:
+                    user_id = banking_row[2]  # Assuming user_id is at index 2 in banking_relations
+                    platform_row = platform_dict.get(user_id)
+                    
+                    if platform_row:
+                        combined_row = list(banking_row)
+                        for i, value in enumerate(platform_row[1:]):
+                            if i + len(banking_columns) < len(header):
+                                column_name = header[i + len(banking_columns)]
+                                if column_name.startswith('_'):
+                                    decrypted_value = decrypt_value(value, row_num, column_name)
+                                    combined_row.append(decrypted_value)
+                                else:
+                                    combined_row.append(value)
+                            else:
+                                logger.warning(f"Warning: Skipping extra column in platform data for row {row_num}")
+                        
+                        if len(combined_row) < len(header):
+                            logger.warning(f"Warning: Row {row_num} has fewer columns than expected. Padding with None.")
+                            combined_row.extend([None] * (len(header) - len(combined_row)))
+                        
+                        csvwriter.writerow(combined_row)
+                        records_processed += 1
+                        
+                        if records_processed % 1000 == 0:
+                            logger.info(f"Processed {records_processed} records")
+                    else:
+                        logger.warning(f"Warning: No platform data found for user_id {user_id} in row {row_num}")
+                except Exception as e:
+                    logger.error(f"Error processing row {row_num}: {str(e)}", exc_info=True)
+
+        logger.info(f"Total records processed and written to CSV: {records_processed}")
+
+        # Close database connections
+        cursor_banking.close()
+        conn_banking.close()
+        cursor_platform.close()
+        conn_platform.close()
+        logger.info("Database connections closed")
+
+        # Verify the CSV file
+        if os.path.exists(csv_file_path) and os.path.getsize(csv_file_path) > 0:
+            logger.info(f"CSV file verified: {csv_file_path}")
+            logger.info(f"CSV file size: {os.path.getsize(csv_file_path)} bytes")
+        else:
+            raise FileNotFoundError(f"CSV file not created or empty: {csv_file_path}")
+
+        return csv_file_path
+
+    except Exception as e:
+        logger.error(f"Error in generate_csv_card_report: {str(e)}", exc_info=True)
+        raise
+
+# Define the SQL queries
 query_banking_relations = """
     SELECT id, 
         customer_id, 
@@ -123,125 +270,4 @@ query_platform = """
     WHERE u.customer_uuid IS NOT NULL
        AND u.company_id = c.id
     ORDER BY u.id;
-"""
-
-
-class FernetSingleton:
-    """Singleton class for Fernet decryption."""
-    
-    class __FernetSingleton:
-        def __init__(self):
-            key_bytes = DB_KEY.encode('utf-8')
-            self.fernet = Fernet(key_bytes)
-    
-    instance = None
-
-    def __init__(self):
-        if not FernetSingleton.instance:
-            FernetSingleton.instance = FernetSingleton.__FernetSingleton().fernet
-
-    def __getattr__(self, name):
-        return getattr(self.instance, name)
-
-# Initialize Fernet singleton
-fernet = FernetSingleton()
-
-def create_db_connection(db_config):
-    """Create and return a database connection."""
-    print(f"Attempting to connect to database:")
-    print(f"  Database name: {db_config['dbname']}")
-    print(f"  Host: {db_config['host']}")
-    print(f"  Port: {db_config['port']}")
-    print(f"  User: {db_config['user']}")
-    print(f"  Password: {'*' * len(db_config['password'])}")  # No mostrar la contraseña real
-    
-    try:
-        conn = psycopg2.connect(
-            dbname=db_config['dbname'],
-            user=db_config['user'],
-            password=db_config['password'],
-            host=db_config['host'],
-            port=db_config['port']
-        )
-        print("Connection successful!")
-        return conn
-    except Exception as e:
-        print(f"Error connecting to database: {str(e)}")
-        raise
-
-def execute_query(cursor, query):
-    """Execute the given SQL query and return the results."""
-    cursor.execute(query)
-    return cursor.fetchall(), [desc[0] for desc in cursor.description]
-
-def decrypt_value(value, row_number, field_name):
-    """Decrypt a base64 encoded value using Fernet."""
-    try:
-        if value is None:
-            return None
-        if isinstance(value, memoryview):
-            value = value.tobytes()
-        if isinstance(value, bytes):
-            return fernet.decrypt(value).decode("utf-8")
-        elif isinstance(value, str):
-            value_bytes = base64.urlsafe_b64decode(value)
-            return fernet.decrypt(value_bytes).decode("utf-8")
-        else:
-            print(f"Unsupported value type for decryption in {field_name}, row {row_number}: {type(value)}")
-            return str(value)  # Return the value as a string instead of None
-    except Exception as e:
-        print(f"Error decrypting {field_name} in row {row_number}: {e}")
-        return str(value)  # Return the value as a string instead of None
-
-def cleanup_temp_files(temp_dir):
-    """Clean up temporary files and directories."""
-    try:
-        for file in os.listdir(temp_dir):
-            file_path = os.path.join(temp_dir, file)
-            if os.path.isfile(file_path):
-                os.unlink(file_path)
-        logger.info(f"Temporary files removed from: {temp_dir}")
-    except Exception as e:
-        logger.error(f"Error removing temporary files: {str(e)}")
-
-def generate_csv_card_report():
-    temp_dir = '/home/administrador/temp-files'
-    os.makedirs(temp_dir, exist_ok=True)
-    logger.info(f"Using directory: {temp_dir}")
-    
-    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    csv_file_path = os.path.join(temp_dir, f'card_report_{timestamp}.csv')
-    zip_file_path = os.path.join(temp_dir, f'card_report_{timestamp}.zip')
-    
-    logger.info(f"CSV file path: {csv_file_path}")
-    logger.info(f"ZIP file path: {zip_file_path}")
-
-    try:
-        # ... [código para generar el CSV] ...
-
-        # Compress the CSV file
-        with zipfile.ZipFile(zip_file_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
-            zipf.write(csv_file_path, os.path.basename(csv_file_path))
-        logger.info(f"Compression completed. Zip file path: {zip_file_path}")
-
-        # Verify the zip file
-        if os.path.exists(zip_file_path) and os.path.getsize(zip_file_path) > 0:
-            logger.info(f"Zip file verified: {zip_file_path}")
-            logger.info(f"Zip file size: {os.path.getsize(zip_file_path)} bytes")
-        else:
-            logger.error("Error: Zip file not created or empty")
-
-        return zip_file_path
-
-    except Exception as e:
-        logger.error(f"Error in generate_csv_card_report: {str(e)}", exc_info=True)
-        raise
-
-def cleanup_temp_files(temp_dir):
-    """Clean up temporary files and directories."""
-    try:
-        if os.path.exists(temp_dir):
-            shutil.rmtree(temp_dir)
-            logger.info(f"Temporary directory removed: {temp_dir}")
-    except Exception as e:
-        logger.error(f"Error removing temporary directory: {str(e)}")
+""" 
