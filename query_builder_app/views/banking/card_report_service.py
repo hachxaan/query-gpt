@@ -10,6 +10,9 @@ import csv
 import tempfile
 import zipfile
 from datetime import datetime
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Load environment variables from the .env file
 load_dotenv()
@@ -272,7 +275,7 @@ def generate_csv_card_report():
             except Exception as e:
                 print(f"Error processing row {row_num}: {str(e)}")
 
-    print(f"Total records processed and written to CSV: {records_processed}")
+        print(f"Total records processed and written to CSV: {records_processed}")
 
         # Close database connections
         cursor_banking.close()
