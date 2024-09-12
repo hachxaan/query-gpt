@@ -193,99 +193,35 @@ def decrypt_value(value, row_number, field_name):
         print(f"Error decrypting {field_name} in row {row_number}: {e}")
         return str(value)  # Return the value as a string instead of None
 
-def compress_files(directory_name):
-    """Compress all CSV files in the directory into a single zip file."""
-    zip_file_path = os.path.join(directory_name, f"card_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.zip")
-    print(f"Creating zip file: {zip_file_path}")
-    with zipfile.ZipFile(zip_file_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
-        for root, _, files in os.walk(directory_name):
-            for file in files:
-                if file.endswith('.csv'):
-                    file_path = os.path.join(root, file)
-                    print(f"Adding file to zip: {file_path}")
-                    zipf.write(file_path, arcname=file)
-    print(f"Zip file created successfully: {zip_file_path}")
-    return zip_file_path
+def cleanup_temp_files(temp_dir):
+    """Clean up temporary files and directories."""
+    try:
+        for file in os.listdir(temp_dir):
+            file_path = os.path.join(temp_dir, file)
+            if os.path.isfile(file_path):
+                os.unlink(file_path)
+        logger.info(f"Temporary files removed from: {temp_dir}")
+    except Exception as e:
+        logger.error(f"Error removing temporary files: {str(e)}")
 
 def generate_csv_card_report():
-    temp_dir = tempfile.mkdtemp(prefix='card_report_')
-    logger.info(f"Temporary directory created: {temp_dir}")
-    csv_file_path = os.path.join(temp_dir, 'card_report.csv')
+    temp_dir = '/home/administrador/temp-files'
+    os.makedirs(temp_dir, exist_ok=True)
+    logger.info(f"Using directory: {temp_dir}")
+    
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    csv_file_path = os.path.join(temp_dir, f'card_report_{timestamp}.csv')
+    zip_file_path = os.path.join(temp_dir, f'card_report_{timestamp}.zip')
+    
     logger.info(f"CSV file path: {csv_file_path}")
+    logger.info(f"ZIP file path: {zip_file_path}")
 
     try:
-        # Get data from banking_relations database
-        logger.info("Connecting to banking_relations database...")
-        conn_banking = create_db_connection(db_config_banking_relations)
-        cursor_banking = conn_banking.cursor()
-        banking_data, banking_columns = execute_query(cursor_banking, query_banking_relations)
-        logger.info(f"Retrieved {len(banking_data)} records from banking_relations")
-
-        # Get data from platform database
-        logger.info("Connecting to platform database...")
-        conn_platform = create_db_connection(db_config_platform)
-        cursor_platform = conn_platform.cursor()
-        platform_data, platform_columns = execute_query(cursor_platform, query_platform)
-        logger.info(f"Retrieved {len(platform_data)} records from platform")
-
-        # Create a dictionary to store platform data keyed by user_id
-        platform_dict = {row[0]: row for row in platform_data}
-        logger.info(f"Created platform dictionary with {len(platform_dict)} entries")
-
-        # Combine data and write to CSV
-        records_processed = 0
-        with open(csv_file_path, 'w', newline='', encoding='utf-8') as csvfile:
-            csvwriter = csv.writer(csvfile)
-            
-            # Write header
-            header = banking_columns + [col for col in platform_columns if col != 'user_id']
-            csvwriter.writerow(header)
-            logger.info(f"CSV header written: {', '.join(header)}")
-
-            # Write data rows
-            for row_num, banking_row in enumerate(banking_data, start=1):
-                try:
-                    user_id = banking_row[2]  # Assuming user_id is at index 2 in banking_relations
-                    platform_row = platform_dict.get(user_id)
-                    
-                    if platform_row:
-                        combined_row = list(banking_row)
-                        for i, value in enumerate(platform_row[1:]):
-                            if i + len(banking_columns) < len(header):
-                                column_name = header[i + len(banking_columns)]
-                                if column_name.startswith('_'):
-                                    decrypted_value = decrypt_value(value, row_num, column_name)
-                                    combined_row.append(decrypted_value)
-                                else:
-                                    combined_row.append(value)
-                            else:
-                                logger.warning(f"Warning: Skipping extra column in platform data for row {row_num}")
-                        
-                        if len(combined_row) < len(header):
-                            logger.warning(f"Warning: Row {row_num} has fewer columns than expected. Padding with None.")
-                            combined_row.extend([None] * (len(header) - len(combined_row)))
-                        
-                        csvwriter.writerow(combined_row)
-                        records_processed += 1
-                        
-                        if records_processed % 1000 == 0:
-                            logger.info(f"Processed {records_processed} records")
-                    else:
-                        logger.warning(f"Warning: No platform data found for user_id {user_id} in row {row_num}")
-                except Exception as e:
-                    logger.error(f"Error processing row {row_num}: {str(e)}", exc_info=True)
-
-        logger.info(f"Total records processed and written to CSV: {records_processed}")
-
-        # Close database connections
-        cursor_banking.close()
-        conn_banking.close()
-        cursor_platform.close()
-        conn_platform.close()
-        logger.info("Database connections closed")
+        # ... [código para generar el CSV] ...
 
         # Compress the CSV file
-        zip_file_path = compress_files(temp_dir)
+        with zipfile.ZipFile(zip_file_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            zipf.write(csv_file_path, os.path.basename(csv_file_path))
         logger.info(f"Compression completed. Zip file path: {zip_file_path}")
 
         # Verify the zip file

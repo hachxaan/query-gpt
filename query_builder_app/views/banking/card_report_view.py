@@ -3,8 +3,7 @@ from django.views import View
 import os
 import traceback
 import logging
-from .card_report_service import generate_csv_card_report
-from django.core.files import File
+from .card_report_service import generate_csv_card_report, cleanup_temp_files
 
 logger = logging.getLogger(__name__)
 
@@ -30,8 +29,7 @@ class GenerateAndDownloadCSVCardsView(View):
                 return HttpResponse(error_message, status=500)
             
             logger.info(f"Opening zip file for response: {zip_file_path}")
-            with open(zip_file_path, 'rb') as f:
-                file = File(f)
+            with open(zip_file_path, 'rb') as file:
                 response = FileResponse(file, content_type='application/zip')
                 response['Content-Disposition'] = f'attachment; filename="{os.path.basename(zip_file_path)}"'
                 response['Content-Length'] = file_size
@@ -44,5 +42,6 @@ class GenerateAndDownloadCSVCardsView(View):
             return HttpResponse(error_message, status=500)
         
         finally:
-            # We don't remove the file here anymore
             logger.info("Request processing completed")
+            if zip_file_path:
+                cleanup_temp_files(os.path.dirname(zip_file_path))
