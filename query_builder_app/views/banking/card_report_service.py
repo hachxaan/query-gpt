@@ -144,13 +144,26 @@ fernet = FernetSingleton()
 
 def create_db_connection(db_config):
     """Create and return a database connection."""
-    return psycopg2.connect(
-        dbname=db_config['dbname'],
-        user=db_config['user'],
-        password=db_config['password'],
-        host=db_config['host'],
-        port=db_config['port']
-    )
+    print(f"Attempting to connect to database:")
+    print(f"  Database name: {db_config['dbname']}")
+    print(f"  Host: {db_config['host']}")
+    print(f"  Port: {db_config['port']}")
+    print(f"  User: {db_config['user']}")
+    print(f"  Password: {'*' * len(db_config['password'])}")  # No mostrar la contraseña real
+    
+    try:
+        conn = psycopg2.connect(
+            dbname=db_config['dbname'],
+            user=db_config['user'],
+            password=db_config['password'],
+            host=db_config['host'],
+            port=db_config['port']
+        )
+        print("Connection successful!")
+        return conn
+    except Exception as e:
+        print(f"Error connecting to database: {str(e)}")
+        raise
 
 def execute_query(cursor, query):
     """Execute the given SQL query and return the results."""
@@ -196,12 +209,14 @@ def generate_csv_card_report():
 
     try:
         # Get data from banking_relations database
+        print("Connecting to banking_relations database...")
         conn_banking = create_db_connection(db_config_banking_relations)
         cursor_banking = conn_banking.cursor()
         banking_data, banking_columns = execute_query(cursor_banking, query_banking_relations)
         print(f"Retrieved {len(banking_data)} records from banking_relations")
 
         # Get data from platform database
+        print("Connecting to platform database...")
         conn_platform = create_db_connection(db_config_platform)
         cursor_platform = conn_platform.cursor()
         platform_data, platform_columns = execute_query(cursor_platform, query_platform)
