@@ -232,61 +232,61 @@ def generate_csv_card_report():
         platform_dict = {row[0]: row for row in platform_data}
         print(f"Created platform dictionary with {len(platform_dict)} entries")
 
-# Combine data and write to CSV
-    records_processed = 0
-    with open(csv_file_path, 'w', newline='', encoding='utf-8') as csvfile:
-        csvwriter = csv.writer(csvfile)
-        
-        # Write header
-        header = banking_columns + [col for col in platform_columns if col != 'user_id']
-        csvwriter.writerow(header)
-        print(f"CSV header written: {', '.join(header)}")
+        # Combine data and write to CSV
+        records_processed = 0
+        with open(csv_file_path, 'w', newline='', encoding='utf-8') as csvfile:
+            csvwriter = csv.writer(csvfile)
+            
+            # Write header
+            header = banking_columns + [col for col in platform_columns if col != 'user_id']
+            csvwriter.writerow(header)
+            print(f"CSV header written: {', '.join(header)}")
 
-        # Write data rows
-        for row_num, banking_row in enumerate(banking_data, start=1):
-            try:
-                user_id = banking_row[2]  # Assuming user_id is at index 2 in banking_relations
-                platform_row = platform_dict.get(user_id)
-                
-                if platform_row:
-                    combined_row = list(banking_row)
-                    for i, value in enumerate(platform_row[1:]):
-                        if i + len(banking_columns) < len(header):
-                            column_name = header[i + len(banking_columns)]
-                            if column_name.startswith('_'):
-                                decrypted_value = decrypt_value(value, row_num, column_name)
-                                combined_row.append(decrypted_value)
+            # Write data rows
+            for row_num, banking_row in enumerate(banking_data, start=1):
+                try:
+                    user_id = banking_row[2]  # Assuming user_id is at index 2 in banking_relations
+                    platform_row = platform_dict.get(user_id)
+                    
+                    if platform_row:
+                        combined_row = list(banking_row)
+                        for i, value in enumerate(platform_row[1:]):
+                            if i + len(banking_columns) < len(header):
+                                column_name = header[i + len(banking_columns)]
+                                if column_name.startswith('_'):
+                                    decrypted_value = decrypt_value(value, row_num, column_name)
+                                    combined_row.append(decrypted_value)
+                                else:
+                                    combined_row.append(value)
                             else:
-                                combined_row.append(value)
-                        else:
-                            print(f"Warning: Skipping extra column in platform data for row {row_num}")
-                    
-                    if len(combined_row) < len(header):
-                        print(f"Warning: Row {row_num} has fewer columns than expected. Padding with None.")
-                        combined_row.extend([None] * (len(header) - len(combined_row)))
-                    
-                    csvwriter.writerow(combined_row)
-                    records_processed += 1
-                    
-                    if records_processed % 1000 == 0:
-                        print(f"Processed {records_processed} records")
-                else:
-                    print(f"Warning: No platform data found for user_id {user_id} in row {row_num}")
-            except Exception as e:
-                print(f"Error processing row {row_num}: {str(e)}")
+                                print(f"Warning: Skipping extra column in platform data for row {row_num}")
+                        
+                        if len(combined_row) < len(header):
+                            print(f"Warning: Row {row_num} has fewer columns than expected. Padding with None.")
+                            combined_row.extend([None] * (len(header) - len(combined_row)))
+                        
+                        csvwriter.writerow(combined_row)
+                        records_processed += 1
+                        
+                        if records_processed % 1000 == 0:
+                            print(f"Processed {records_processed} records")
+                    else:
+                        print(f"Warning: No platform data found for user_id {user_id} in row {row_num}")
+                except Exception as e:
+                    print(f"Error processing row {row_num}: {str(e)}")
 
-        print(f"Total records processed and written to CSV: {records_processed}")
+            print(f"Total records processed and written to CSV: {records_processed}")
 
-        # Close database connections
-        cursor_banking.close()
-        conn_banking.close()
-        cursor_platform.close()
-        conn_platform.close()
-        print("Database connections closed")
+            # Close database connections
+            cursor_banking.close()
+            conn_banking.close()
+            cursor_platform.close()
+            conn_platform.close()
+            print("Database connections closed")
 
-        # Compress the CSV file
-        zip_file_path = compress_files(temp_dir)
-        print(f"Compression completed. Zip file path: {zip_file_path}")
+            # Compress the CSV file
+            zip_file_path = compress_files(temp_dir)
+            print(f"Compression completed. Zip file path: {zip_file_path}")
 
         # Verify the zip file
         if os.path.exists(zip_file_path) and os.path.getsize(zip_file_path) > 0:
