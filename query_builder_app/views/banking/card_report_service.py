@@ -124,7 +124,7 @@ def generate_csv_card_report():
         logger.info(f"Retrieved {len(platform_data)} records from platform")
 
         # Create a dictionary to store platform data keyed by user_id
-        platform_dict = {row[0]: row for row in platform_data}
+        platform_dict = {str(row[0]): row for row in platform_data}
         logger.info(f"Created platform dictionary with {len(platform_dict)} entries")
 
         # Combine data and write to CSV
@@ -133,28 +133,25 @@ def generate_csv_card_report():
             csvwriter = csv.writer(csvfile)
             
             # Write header
-            header = list(solid_report_data[0].keys()) + [col for col in platform_columns if col != 'user_id']
+            header = list(solid_report_data[0].keys()) + [f"platform_{col}" for col in platform_columns if col != 'id']
             csvwriter.writerow(header)
             logger.info(f"CSV header written: {', '.join(header)}")
 
             # Write data rows
             for row_num, solid_row in enumerate(solid_report_data, start=1):
                 try:
-                    user_id = solid_row.get('userId')  # Assuming userId is the key in Solid Report data
-                    platform_row = platform_dict.get(user_id)
+                    user_id = solid_row.get('customer_userId')
+                    platform_row = platform_dict.get(str(user_id))
                     
                     if platform_row:
                         combined_row = list(solid_row.values())
-                        for i, value in enumerate(platform_row[1:]):
-                            if i + len(solid_row) < len(header):
-                                column_name = header[i + len(solid_row)]
-                                if column_name.startswith('_'):
-                                    decrypted_value = decrypt_value(value, row_num, column_name)
-                                    combined_row.append(decrypted_value)
-                                else:
-                                    combined_row.append(value)
+                        for i, value in enumerate(platform_row[1:], start=1):
+                            column_name = f"platform_{platform_columns[i]}"
+                            if column_name.startswith('platform__'):
+                                decrypted_value = decrypt_value(value, row_num, column_name)
+                                combined_row.append(decrypted_value)
                             else:
-                                logger.warning(f"Warning: Skipping extra column in platform data for row {row_num}")
+                                combined_row.append(value)
                         
                         if len(combined_row) < len(header):
                             logger.warning(f"Warning: Row {row_num} has fewer columns than expected. Padding with None.")
