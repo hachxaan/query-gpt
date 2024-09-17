@@ -12,13 +12,20 @@ User=administrador
 KillSignal=SIGTERM
 Type=notify
 NotifyAccess=all
-StandardOutput=journal
-StandardError=journal
+
+# Cambiar la salida estándar a 'journal+console' para mostrar logs en tiempo real
+StandardOutput=journal+console
+StandardError=journal+console
+
+# Desactivar el buffering de la salida
+Environment=PYTHONUNBUFFERED=1
 
 WorkingDirectory=/home/administrador/microservices/microservice-backoffice
 Environment="PATH=/home/administrador/microservices/microservice-backoffice/venv/bin"
 Environment="DJANGO_SETTINGS_MODULE=backoffice.settings"
-ExecStart=/home/administrador/microservices/microservice-backoffice/venv/bin/uwsgi --ini backoffice-beta.ini
+
+# Modificar la línea ExecStart para incluir opciones de uWSGI que desactiven el buffering
+ExecStart=/home/administrador/microservices/microservice-backoffice/venv/bin/uwsgi --ini backoffice-beta.ini --log-master --log-5xx --disable-logging --immediate-uid-reload
 
 [Install]
 WantedBy=multi-user.target
