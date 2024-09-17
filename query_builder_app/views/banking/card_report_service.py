@@ -154,8 +154,8 @@ def generate_csv_card_report():
         logger.info(f"Retrieved {len(platform_data)} records from platform")
         sys.stdout.flush()
 
-        # Create a dictionary to store platform data keyed by user_customer_uuid
-        platform_dict = {row[platform_columns.index('users_customer_uuid')]: row for row in platform_data}
+        # Create a dictionary to store platform data keyed by user_user_id
+        platform_dict = {row[platform_columns.index('users_id')]: row for row in platform_data}
         logger.info(f"Created platform dictionary with {len(platform_dict)} entries")
         sys.stdout.flush()
 
@@ -173,8 +173,8 @@ def generate_csv_card_report():
             # Write data rows
             for row_num, solid_row in enumerate(solid_report_data, start=1):
                 try:
-                    customer_uuid = solid_row.get('customer_uuid')
-                    platform_row = platform_dict.get(customer_uuid)
+                    user_id = solid_row.get('customer_userId')
+                    platform_row = platform_dict.get(user_id)
                     
                     if platform_row:
                         combined_row = list(solid_row.values())
@@ -198,7 +198,7 @@ def generate_csv_card_report():
                             logger.info(f"Processed {records_processed} records")
                             sys.stdout.flush()
                     else:
-                        logger.warning(f"Warning: No platform data found for customer_uuid {customer_uuid} in row {row_num}")
+                        logger.warning(f"Warning: No platform data found for user_id {user_id} in row {row_num}")
                         sys.stdout.flush()
                 except Exception as e:
                     logger.error(f"Error processing row {row_num}: {str(e)}", exc_info=True)
