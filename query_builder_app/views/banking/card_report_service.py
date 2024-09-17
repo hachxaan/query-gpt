@@ -1,5 +1,5 @@
 # query_builder_app/views/banking/card_report_service.py
- 
+
 import os
 import psycopg2
 from cryptography.fernet import Fernet
@@ -9,20 +9,16 @@ import csv
 from datetime import datetime
 import logging
 import tempfile
+import requests
 
 logger = logging.getLogger(__name__)
 
 # Load environment variables from the .env file
 load_dotenv()
 
-# Database configuration for banking relations
-db_config_banking_relations = {
-    'user': os.getenv('USER_BANKING_RELATIONS'),
-    'password': os.getenv('PASSWORD_BANKING_RELATIONS'),
-    'dbname': os.getenv('NAME_BANKING_RELATIONS'),
-    'host': os.getenv('HOST_BANKING_RELATIONS'),
-    'port': os.getenv('PORT_BANKING_RELATIONS')
-}
+# API configuration for Solid Report
+SOLID_REPORT_API_KEY = os.getenv('SOLID_REPORT_API_KEY')
+SOLID_REPORT_API_URL = 'https://api.accesswages.com/api/v2/solid-reports/card-data'
 
 # Database configuration for platform
 db_config_platform = {
@@ -90,6 +86,16 @@ def decrypt_value(value, row_number, field_name):
         logger.error(f"Error decrypting {field_name} in row {row_number}: {e}")
         return str(value)
 
+def get_solid_report_data():
+    """Fetch data from Solid Report API."""
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': SOLID_REPORT_API_KEY
+    }
+    response = requests.get(SOLID_REPORT_API_URL, headers=headers)
+    response.raise_for_status()
+    return response.json()
+
 def generate_csv_card_report():
     temp_dir = '/home/administrador/temp-files'
     if not os.access(temp_dir, os.W_OK):
@@ -105,12 +111,10 @@ def generate_csv_card_report():
     logger.info(f"CSV file path: {csv_file_path}")
 
     try:
-        # Get data from banking_relations database
-        logger.info("Connecting to banking_relations database...")
-        conn_banking = create_db_connection(db_config_banking_relations)
-        cursor_banking = conn_banking.cursor()
-        banking_data, banking_columns = execute_query(cursor_banking, query_banking_relations)
-        logger.info(f"Retrieved {len(banking_data)} records from banking_relations")
+        # Get data from Solid Report API
+        logger.info("Fetching data from Solid Report API...")
+        solid_report_data = get_solid_report_data()
+        logger.info(f"Retrieved {len(solid_report_data)} records from Solid Report API")
 
         # Get data from platform database
         logger.info("Connecting to platform database...")
@@ -129,21 +133,21 @@ def generate_csv_card_report():
             csvwriter = csv.writer(csvfile)
             
             # Write header
-            header = banking_columns + [col for col in platform_columns if col != 'user_id']
+            header = list(solid_report_data[0].keys()) + [col for col in platform_columns if col != 'user_id']
             csvwriter.writerow(header)
             logger.info(f"CSV header written: {', '.join(header)}")
 
             # Write data rows
-            for row_num, banking_row in enumerate(banking_data, start=1):
+            for row_num, solid_row in enumerate(solid_report_data, start=1):
                 try:
-                    user_id = banking_row[2]  # Assuming user_id is at index 2 in banking_relations
+                    user_id = solid_row.get('userId')  # Assuming userId is the key in Solid Report data
                     platform_row = platform_dict.get(user_id)
                     
                     if platform_row:
-                        combined_row = list(banking_row)
+                        combined_row = list(solid_row.values())
                         for i, value in enumerate(platform_row[1:]):
-                            if i + len(banking_columns) < len(header):
-                                column_name = header[i + len(banking_columns)]
+                            if i + len(solid_row) < len(header):
+                                column_name = header[i + len(solid_row)]
                                 if column_name.startswith('_'):
                                     decrypted_value = decrypt_value(value, row_num, column_name)
                                     combined_row.append(decrypted_value)
@@ -169,8 +173,6 @@ def generate_csv_card_report():
         logger.info(f"Total records processed and written to CSV: {records_processed}")
 
         # Close database connections
-        cursor_banking.close()
-        conn_banking.close()
         cursor_platform.close()
         conn_platform.close()
         logger.info("Database connections closed")
@@ -188,88 +190,69 @@ def generate_csv_card_report():
         logger.error(f"Error in generate_csv_card_report: {str(e)}", exc_info=True)
         raise
 
-# Define the SQL queries
-query_banking_relations = """
-    SELECT id, 
-        customer_id, 
-        user_id, 
-        peo_company_id, 
-        company_id, 
-        white_label, 
-        person_id,
-        account_id, 
-        card_id, 
-        card_pan, 
-        card_bin, 
-        card_created_at, 
-        card_card_type, 
-        card_card_status, 
-        "createdPersonId", 
-        created_at
-    FROM cards_program
-    WHERE user_id IS NOT NULL
-    ORDER BY user_id;
-"""
-
+# The query_platform remains the same as before
 query_platform = """
     SELECT 
-        u.id AS user_id,
-        u.first_name AS first_name,
-        u.cashback_balance AS cashback_balance,
-        u.cashback_updated AS cashback_updated,
-        u.registration_date AS registration_date,
-        u.inactive AS inactive,
-        u.city AS city,
-        u.state AS state,
-        u.zip_code AS zip_code,
-        u.terms_conditions AS terms_conditions,
-        u.promotional_sms AS promotional_sms,
-        u.promotional_email AS promotional_email,
-        u.last_login_date AS last_login_date,
-        u.confirmed_email AS confirmed_email,
-        u.admin_company AS admin_company,
-        u.admin_multikrd AS admin_multikrd,
-        u.admin_peo AS admin_peo,
-        u.payroll_active AS payroll_active,
-        u.payroll_last_date AS payroll_last_date,
-        u.payroll_type AS payroll_type,
-        u.promotional_phone_calls AS promotional_phone_calls,
-        u.onboarding AS onboarding,
-        u.cashback_historic AS cashback_historic,
-        u.cashback_pending AS cashback_pending,
-        u.wage_access_program AS wage_access_program,
-        u.payroll_frequency AS payroll_frequency,
-        u.worked_hours AS worked_hours,
-        u.termination_date AS termination_date,
-        u.signup_date AS signup_date,
-        u.direct_deposit AS direct_deposit,
-        u._email AS _email,
-        u._last_name AS _last_name,
-        u._birthdate AS _birthdate,
-        u._mobile_phone AS _mobile_phone,
-        u._payroll_daily AS _payroll_daily,
-        u._payroll_hourly AS _payroll_hourly,
-        u._payroll_salary AS _payroll_salary,
-        u.customer_uuid AS customer_uuid,
-        c.name AS company_name,
-        c.active AS company_active,
-        c.created AS company_created,
-        c.payroll_active AS company_payroll_active,
-        c.peo_company AS company_peo_company,
-        c.peo_company_id AS company_peo_company_id,
-        c.white_label AS company_white_label,
-        c.worked_hours AS company_worked_hours,
-        c.white_label_tag AS company_white_label_tag,
-        c.time_clock AS company_time_clock,
-        c.hourly_limit_wa AS company_hourly_limit_wa,
-        c.pct_hours AS company_pct_hours,
-        c.has_normal_hours AS company_has_normal_hours,
-        c.wage_pct_max_custom AS company_wage_pct_max_custom,
-        c.banking AS company_banking,
-        c.go_live_date AS company_go_live_date,
-        c.mailing_group AS company_mailing_group
-    FROM users u, companies c
-    WHERE u.customer_uuid IS NOT NULL
-       AND u.company_id = c.id
-    ORDER BY u.id;
-""" 
+    c.id,
+    c.name,
+    c.url,
+    c.tier,
+    c.active,
+    c.created,
+    c.payroll_active,
+    c.peo_company,
+    c.peo_company_id,
+    c.updated,
+    c._logo_name,
+    c.licensing_fee,
+    c.unique_provider_id,
+    c.white_label,
+    c.worked_hours,
+    c.external_id,
+    c.white_label_tag,
+    c.time_clock,
+    c.hourly_limit_wa,
+    c.timecard_connection_id,
+    c.pct_hours,
+    c.white_label_description,
+    c.has_normal_hours,
+    c.wage_pct_max_custom,
+    c.banking,
+    c.go_live_date,
+    c.mailing_group,
+    c._flags,
+    peo.id AS peo_company_id,
+    peo.name AS peo_company_name,
+    peo.url AS peo_company_url,
+    peo.tier AS peo_company_tier,
+    peo.active AS peo_company_active,
+    peo.created AS peo_company_created,
+    peo.payroll_active AS peo_company_payroll_active,
+    peo.peo_company AS peo_company_peo_company,
+    peo.updated AS peo_company_updated,
+    peo._logo_name AS peo_company__logo_name,
+    peo.licensing_fee AS peo_company_licensing_fee,
+    peo.unique_provider_id AS peo_company_unique_provider_id,
+    peo.white_label AS peo_company_white_label,
+    peo.worked_hours AS peo_company_worked_hours,
+    peo.external_id AS peo_company_external_id,
+    peo.white_label_tag AS peo_company_white_label_tag,
+    peo.time_clock AS peo_company_time_clock,
+    peo.hourly_limit_wa AS peo_company_hourly_limit_wa,
+    peo.timecard_connection_id AS peo_company_timecard_connection_id,
+    peo.pct_hours AS peo_company_pct_hours,
+    peo.white_label_description AS peo_company_white_label_description,
+    peo.has_normal_hours AS peo_company_has_normal_hours,
+    peo.wage_pct_max_custom AS peo_company_wage_pct_max_custom,
+    peo.banking AS peo_company_banking,
+    peo.go_live_date AS peo_company_go_live_date,
+    peo.mailing_group AS peo_company_mailing_group,
+    peo._flags AS peo_company__flags,
+    (SELECT COUNT(*) FROM users u WHERE u.company_id = c.id AND u.inactive = FALSE) AS "active_employee",
+    (SELECT COUNT(*) FROM users u WHERE u.company_id = c.id AND u.inactive = FALSE AND u.signup_date IS NULL ) AS "not_signup_employee",
+    (SELECT COUNT(*) FROM users u WHERE u.company_id = c.id AND u.inactive = FALSE AND u.signup_date IS NOT NULL ) AS "signup_employee"
+FROM 
+    companies c
+LEFT JOIN 
+    companies peo ON c.peo_company_id = peo.id
+"""
