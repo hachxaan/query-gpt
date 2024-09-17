@@ -74,7 +74,7 @@ fernet = FernetSingleton()
 
 def create_db_connection(db_config):
     """Create and return a database connection."""
-    logger.info(f"Connecting to database: {db_config['dbname']} on {db_config['host']}:{db_config['port']}")
+    logger.info(f"Connecting to database: {db_config['dbname']} on {db_config['host']}:{db_config['port']}:{db_config['user']}")
     sys.stdout.flush()
     return psycopg2.connect(
         dbname=db_config['dbname'],
