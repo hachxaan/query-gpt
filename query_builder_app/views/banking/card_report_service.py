@@ -32,6 +32,11 @@ class RealTimeHandler(logging.StreamHandler):
 logger = logging.getLogger(__name__)
 logger.addHandler(RealTimeHandler(sys.stdout))
 
+# The query_platform now uses the new view
+query_platform = """
+    SELECT * FROM vw_users_with_companies_full_v1 WHERE users_customer_uuid IS NOT NULL;
+"""
+
 # API configuration for Solid Report
 SOLID_REPORT_API_KEY = os.getenv('SOLID_REPORT_API_KEY')
 SOLID_REPORT_API_URL = 'https://api.accesswages.com/api/v2/solid-reports/card-data'
@@ -149,8 +154,8 @@ def generate_csv_card_report():
         logger.info(f"Retrieved {len(platform_data)} records from platform")
         sys.stdout.flush()
 
-        # Create a dictionary to store platform data keyed by user_id
-        platform_dict = {str(row[0]): row for row in platform_data}
+        # Create a dictionary to store platform data keyed by user_customer_uuid
+        platform_dict = {row[platform_columns.index('users_customer_uuid')]: row for row in platform_data}
         logger.info(f"Created platform dictionary with {len(platform_dict)} entries")
         sys.stdout.flush()
 
@@ -160,7 +165,7 @@ def generate_csv_card_report():
             csvwriter = csv.writer(csvfile)
             
             # Write header
-            header = list(solid_report_data[0].keys()) + [f"platform_{col}" for col in platform_columns if col != 'id']
+            header = list(solid_report_data[0].keys()) + platform_columns
             csvwriter.writerow(header)
             logger.info(f"CSV header written: {', '.join(header)}")
             sys.stdout.flush()
@@ -168,14 +173,14 @@ def generate_csv_card_report():
             # Write data rows
             for row_num, solid_row in enumerate(solid_report_data, start=1):
                 try:
-                    user_id = solid_row.get('customer_userId')
-                    platform_row = platform_dict.get(str(user_id))
+                    customer_uuid = solid_row.get('customer_uuid')
+                    platform_row = platform_dict.get(customer_uuid)
                     
                     if platform_row:
                         combined_row = list(solid_row.values())
-                        for i, value in enumerate(platform_row[1:], start=1):
-                            column_name = f"platform_{platform_columns[i]}"
-                            if column_name.startswith('platform__'):
+                        for i, value in enumerate(platform_row):
+                            column_name = platform_columns[i]
+                            if column_name.startswith('users__') or column_name.startswith('companies__') or column_name.startswith('peo_company__'):
                                 decrypted_value = decrypt_value(value, row_num, column_name)
                                 combined_row.append(decrypted_value)
                             else:
@@ -193,7 +198,7 @@ def generate_csv_card_report():
                             logger.info(f"Processed {records_processed} records")
                             sys.stdout.flush()
                     else:
-                        logger.warning(f"Warning: No platform data found for user_id {user_id} in row {row_num}")
+                        logger.warning(f"Warning: No platform data found for customer_uuid {customer_uuid} in row {row_num}")
                         sys.stdout.flush()
                 except Exception as e:
                     logger.error(f"Error processing row {row_num}: {str(e)}", exc_info=True)
@@ -222,70 +227,3 @@ def generate_csv_card_report():
         logger.error(f"Error in generate_csv_card_report: {str(e)}", exc_info=True)
         sys.stdout.flush()
         raise
-
-# The query_platform remains the same as before
-query_platform = """
-    SELECT 
-    c.id,
-    c.name,
-    c.url,
-    c.tier,
-    c.active,
-    c.created,
-    c.payroll_active,
-    c.peo_company,
-    c.peo_company_id,
-    c.updated,
-    c._logo_name,
-    c.licensing_fee,
-    c.unique_provider_id,
-    c.white_label,
-    c.worked_hours,
-    c.external_id,
-    c.white_label_tag,
-    c.time_clock,
-    c.hourly_limit_wa,
-    c.timecard_connection_id,
-    c.pct_hours,
-    c.white_label_description,
-    c.has_normal_hours,
-    c.wage_pct_max_custom,
-    c.banking,
-    c.go_live_date,
-    c.mailing_group,
-    c._flags,
-    peo.id AS peo_company_id,
-    peo.name AS peo_company_name,
-    peo.url AS peo_company_url,
-    peo.tier AS peo_company_tier,
-    peo.active AS peo_company_active,
-    peo.created AS peo_company_created,
-    peo.payroll_active AS peo_company_payroll_active,
-    peo.peo_company AS peo_company_peo_company,
-    peo.updated AS peo_company_updated,
-    peo._logo_name AS peo_company__logo_name,
-    peo.licensing_fee AS peo_company_licensing_fee,
-    peo.unique_provider_id AS peo_company_unique_provider_id,
-    peo.white_label AS peo_company_white_label,
-    peo.worked_hours AS peo_company_worked_hours,
-    peo.external_id AS peo_company_external_id,
-    peo.white_label_tag AS peo_company_white_label_tag,
-    peo.time_clock AS peo_company_time_clock,
-    peo.hourly_limit_wa AS peo_company_hourly_limit_wa,
-    peo.timecard_connection_id AS peo_company_timecard_connection_id,
-    peo.pct_hours AS peo_company_pct_hours,
-    peo.white_label_description AS peo_company_white_label_description,
-    peo.has_normal_hours AS peo_company_has_normal_hours,
-    peo.wage_pct_max_custom AS peo_company_wage_pct_max_custom,
-    peo.banking AS peo_company_banking,
-    peo.go_live_date AS peo_company_go_live_date,
-    peo.mailing_group AS peo_company_mailing_group,
-    peo._flags AS peo_company__flags,
-    (SELECT COUNT(*) FROM users u WHERE u.company_id = c.id AND u.inactive = FALSE) AS "active_employee",
-    (SELECT COUNT(*) FROM users u WHERE u.company_id = c.id AND u.inactive = FALSE AND u.signup_date IS NULL ) AS "not_signup_employee",
-    (SELECT COUNT(*) FROM users u WHERE u.company_id = c.id AND u.inactive = FALSE AND u.signup_date IS NOT NULL ) AS "signup_employee"
-FROM 
-    companies c
-LEFT JOIN 
-    companies peo ON c.peo_company_id = peo.id
-"""
