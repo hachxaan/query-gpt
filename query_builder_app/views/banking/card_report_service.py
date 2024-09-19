@@ -148,7 +148,7 @@ def generate_csv_card_report():
             return None
 
         # Log first few records from Solid Report API for debugging
-        logger.debug(f"First 5 records from Solid Report API: {solid_report_data[:5]}")
+        logger.debug(f"First 3 records from Solid Report API: {solid_report_data[:3]}")
 
         # Get data from platform database
         logger.info("Connecting to platform database...")
@@ -160,9 +160,6 @@ def generate_csv_card_report():
         if not platform_data:
             logger.error("No data received from platform database")
             return None
-
-        # Log first few records from platform database for debugging
-        logger.debug(f"First 5 records from platform database: {platform_data[:5]}")
 
         # Create a dictionary to store platform data keyed by user_id
         platform_dict = {row[0]: row for row in platform_data}
@@ -181,9 +178,12 @@ def generate_csv_card_report():
             # Write data rows
             for row_num, solid_row in enumerate(solid_report_data, start=1):
                 try:
-                    user_id = solid_row.get('userId')  # Assuming userId is the key in Solid Report data
+                    # Intenta obtener el user_id de diferentes campos posibles
+                    user_id = solid_row.get('customer_userId') or solid_row.get('userId') or solid_row.get('user_id')
+                    
                     if user_id is None:
-                        logger.warning(f"No userId found in Solid Report data for row {row_num}")
+                        # Si no se encuentra el user_id, registra los campos disponibles para debugging
+                        logger.warning(f"No userId found in Solid Report data for row {row_num}. Available fields: {', '.join(solid_row.keys())}")
                         continue
 
                     platform_row = platform_dict.get(user_id)
@@ -233,4 +233,4 @@ def generate_csv_card_report():
 
     except Exception as e:
         logger.error(f"Error in generate_csv_card_report: {str(e)}", exc_info=True)
-        raises
+        raise
