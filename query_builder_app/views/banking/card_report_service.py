@@ -10,7 +10,10 @@ import csv
 from datetime import datetime
 import logging
 import tempfile
+import logging
 import requests
+
+logger = logging.getLogger(__name__)
 
 # Load environment variables from the .env file
 load_dotenv()
@@ -139,6 +142,13 @@ def generate_csv_card_report():
         logger.info("Fetching data from Solid Report API...")
         solid_report_data = get_solid_report_data()
         logger.info(f"Retrieved {len(solid_report_data)} records from Solid Report API")
+        
+        if not solid_report_data:
+            logger.error("No data received from Solid Report API")
+            return None
+
+        # Log first few records from Solid Report API for debugging
+        logger.debug(f"First 5 records from Solid Report API: {solid_report_data[:5]}")
 
         # Get data from platform database
         logger.info("Connecting to platform database...")
@@ -146,6 +156,13 @@ def generate_csv_card_report():
         cursor_platform = conn_platform.cursor()
         platform_data, platform_columns = execute_query(cursor_platform, query_platform)
         logger.info(f"Retrieved {len(platform_data)} records from platform")
+
+        if not platform_data:
+            logger.error("No data received from platform database")
+            return None
+
+        # Log first few records from platform database for debugging
+        logger.debug(f"First 5 records from platform database: {platform_data[:5]}")
 
         # Create a dictionary to store platform data keyed by user_id
         platform_dict = {row[0]: row for row in platform_data}
@@ -165,6 +182,10 @@ def generate_csv_card_report():
             for row_num, solid_row in enumerate(solid_report_data, start=1):
                 try:
                     user_id = solid_row.get('userId')  # Assuming userId is the key in Solid Report data
+                    if user_id is None:
+                        logger.warning(f"No userId found in Solid Report data for row {row_num}")
+                        continue
+
                     platform_row = platform_dict.get(user_id)
                     
                     if platform_row:
@@ -212,4 +233,4 @@ def generate_csv_card_report():
 
     except Exception as e:
         logger.error(f"Error in generate_csv_card_report: {str(e)}", exc_info=True)
-        raise
+        raises
