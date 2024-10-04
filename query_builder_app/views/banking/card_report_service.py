@@ -144,42 +144,104 @@ def process_data(solid_report_data, platform_data, platform_columns):
     return combined_rows
 
 def generate_csv_card_report():
-    """Generar el reporte CSV combinando los datos de la API y la base de datos."""
-    temp_dir = tempfile.gettempdir()
+    temp_dir = '/home/administrador/temp-files'
+    if not os.access(temp_dir, os.W_OK):
+        logger.warning(f"No write access to {temp_dir}. Using system temp directory.")
+        sys.stdout.flush()
+        temp_dir = tempfile.gettempdir()
+    
+    os.makedirs(temp_dir, exist_ok=True)
+    logger.info(f"Using directory: {temp_dir}")
+    sys.stdout.flush()
+    
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     csv_file_path = os.path.join(temp_dir, f'card_report_{timestamp}.csv')
+    
+    logger.info(f"CSV file path: {csv_file_path}")
+    sys.stdout.flush()
 
     try:
-        # Obtener datos de la API de Solid Report
+        # Get data from Solid Report API
         logger.info("Fetching data from Solid Report API...")
+        sys.stdout.flush()
         solid_report_data = get_solid_report_data()
+        logger.info(f"Retrieved {len(solid_report_data)} records from Solid Report API")
+        sys.stdout.flush()
 
-        # Conectar a la base de datos y obtener datos de la plataforma
-        conn_platform = create_db_connection(DB_CONFIG_PLATFORM)
+        # Get data from platform database
+        logger.info("Connecting to platform database...")
+        sys.stdout.flush()
+        conn_platform = create_db_connection(db_config_platform)
         cursor_platform = conn_platform.cursor()
-        platform_data, platform_columns = execute_query(cursor_platform, QUERY_PLATFORM)
+        platform_data, platform_columns = execute_query(cursor_platform, query_platform)
+        logger.info(f"Retrieved {len(platform_data)} records from platform")
+        sys.stdout.flush()
 
-        # Combinar los datos y escribirlos en el CSV
-        header = list(solid_report_data[0].keys()) + platform_columns
-        combined_rows = process_data(solid_report_data, platform_data, platform_columns)
+        # Create a dictionary to store platform data keyed by user_user_id
+        platform_dict = {row[platform_columns.index('users_id')]: row for row in platform_data}
+        logger.info(f"Created platform dictionary with {len(platform_dict)} entries")
+        sys.stdout.flush()
 
-        write_csv_file(header, combined_rows, csv_file_path)
+        # Combine data and write to CSV
+        records_processed = 0
+        with open(csv_file_path, 'w', newline='', encoding='utf-8') as csvfile:
+            csvwriter = csv.writer(csvfile, quoting=csv.QUOTE_ALL)  # Use csv.QUOTE_ALL to quote all values
+            
+            # Write header
+            header = list(solid_report_data[0].keys()) + platform_columns
+            csvwriter.writerow(header)
+            logger.info(f"CSV header written: {', '.join(header)}")
+            sys.stdout.flush()
 
-        logger.info(f"Total records processed and written to CSV: {len(combined_rows)}")
+            # Write data rows
+            for row_num, solid_row in enumerate(solid_report_data, start=1):
+                try:
+                    user_id = solid_row.get('customer_userId')
+                    platform_row = platform_dict.get(user_id)
+                    
+                    if platform_row:
+                        combined_row = list(solid_row.values())
+                        for i, value in enumerate(platform_row):
+                            column_name = platform_columns[i]
+                            if column_name.startswith('users__') or column_name.startswith('companies__') or column_name.startswith('peo_company__'):
+                                decrypted_value = decrypt_value(value, row_num, column_name)
+                                combined_row.append(decrypted_value)
+                            else:
+                                combined_row.append(value)
 
-        # Verificar el archivo CSV
+                        csvwriter.writerow(combined_row)  # Automatically handles quoting
+                        records_processed += 1
+                        
+                        if records_processed % 1000 == 0:
+                            logger.info(f"Processed {records_processed} records")
+                            sys.stdout.flush()
+                    else:
+                        logger.warning(f"Warning: No platform data found for user_id {user_id} in row {row_num}")
+                        sys.stdout.flush()
+                except Exception as e:
+                    logger.error(f"Error processing row {row_num}: {str(e)}", exc_info=True)
+                    sys.stdout.flush()
+
+        logger.info(f"Total records processed and written to CSV: {records_processed}")
+        sys.stdout.flush()
+
+        # Close database connections
+        cursor_platform.close()
+        conn_platform.close()
+        logger.info("Database connections closed")
+        sys.stdout.flush()
+
+        # Verify the CSV file
         if os.path.exists(csv_file_path) and os.path.getsize(csv_file_path) > 0:
-            logger.info(f"CSV file verified: {csv_file_path} ({os.path.getsize(csv_file_path)} bytes)")
+            logger.info(f"CSV file verified: {csv_file_path}")
+            logger.info(f"CSV file size: {os.path.getsize(csv_file_path)} bytes")
+            sys.stdout.flush()
         else:
             raise FileNotFoundError(f"CSV file not created or empty: {csv_file_path}")
 
         return csv_file_path
 
     except Exception as e:
-        logger.error(f"Error in generate_csv_card_report: {e}", exc_info=True)
+        logger.error(f"Error in generate_csv_card_report: {str(e)}", exc_info=True)
+        sys.stdout.flush()
         raise
-
-    finally:
-        cursor_platform.close()
-        conn_platform.close()
-        logger.info("Database connections closed")
