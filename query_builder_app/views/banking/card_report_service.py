@@ -161,39 +161,40 @@ def generate_csv_card_report():
     sys.stdout.flush()
 
     try:
-        # Get data from Solid Report API
+        # Obtener datos de la API Solid Report
         logger.info("Fetching data from Solid Report API...")
         sys.stdout.flush()
         solid_report_data = get_solid_report_data()
         logger.info(f"Retrieved {len(solid_report_data)} records from Solid Report API")
         sys.stdout.flush()
 
-        # Get data from platform database
+        # Obtener datos de la base de datos de la plataforma
         logger.info("Connecting to platform database...")
         sys.stdout.flush()
-        conn_platform = create_db_connection(db_config_platform)
+        conn_platform = create_db_connection(DB_CONFIG_PLATFORM)
         cursor_platform = conn_platform.cursor()
-        platform_data, platform_columns = execute_query(cursor_platform, query_platform)
+        platform_data, platform_columns = execute_query(cursor_platform, QUERY_PLATFORM)
         logger.info(f"Retrieved {len(platform_data)} records from platform")
         sys.stdout.flush()
 
-        # Create a dictionary to store platform data keyed by user_user_id
+        # Crear un diccionario con los datos de la plataforma
         platform_dict = {row[platform_columns.index('users_id')]: row for row in platform_data}
         logger.info(f"Created platform dictionary with {len(platform_dict)} entries")
         sys.stdout.flush()
 
-        # Combine data and write to CSV
+        # Procesar los datos y escribir en CSV
         records_processed = 0
         with open(csv_file_path, 'w', newline='', encoding='utf-8') as csvfile:
-            csvwriter = csv.writer(csvfile, quoting=csv.QUOTE_ALL)  # Use csv.QUOTE_ALL to quote all values
+            # Cambiamos el delimitador a ';' y usamos QUOTE_ALL para evitar desplazamientos
+            csvwriter = csv.writer(csvfile, delimiter=';', quoting=csv.QUOTE_ALL)
             
-            # Write header
+            # Escribir encabezado
             header = list(solid_report_data[0].keys()) + platform_columns
             csvwriter.writerow(header)
             logger.info(f"CSV header written: {', '.join(header)}")
             sys.stdout.flush()
 
-            # Write data rows
+            # Escribir filas de datos
             for row_num, solid_row in enumerate(solid_report_data, start=1):
                 try:
                     user_id = solid_row.get('customer_userId')
@@ -203,20 +204,20 @@ def generate_csv_card_report():
                         combined_row = list(solid_row.values())
                         for i, value in enumerate(platform_row):
                             column_name = platform_columns[i]
-                            if column_name.startswith('users__') or column_name.startswith('companies__') or column_name.startswith('peo_company__'):
+                            if column_name.startswith(('users__', 'companies__', 'peo_company__')):
                                 decrypted_value = decrypt_value(value, row_num, column_name)
                                 combined_row.append(decrypted_value)
                             else:
                                 combined_row.append(value)
 
-                        csvwriter.writerow(combined_row)  # Automatically handles quoting
+                        csvwriter.writerow(combined_row)
                         records_processed += 1
                         
                         if records_processed % 1000 == 0:
                             logger.info(f"Processed {records_processed} records")
                             sys.stdout.flush()
                     else:
-                        logger.warning(f"Warning: No platform data found for user_id {user_id} in row {row_num}")
+                        logger.warning(f"No platform data found for user_id {user_id} in row {row_num}")
                         sys.stdout.flush()
                 except Exception as e:
                     logger.error(f"Error processing row {row_num}: {str(e)}", exc_info=True)
@@ -225,13 +226,13 @@ def generate_csv_card_report():
         logger.info(f"Total records processed and written to CSV: {records_processed}")
         sys.stdout.flush()
 
-        # Close database connections
+        # Cerrar conexiones de la base de datos
         cursor_platform.close()
         conn_platform.close()
         logger.info("Database connections closed")
         sys.stdout.flush()
 
-        # Verify the CSV file
+        # Verificar el archivo CSV
         if os.path.exists(csv_file_path) and os.path.getsize(csv_file_path) > 0:
             logger.info(f"CSV file verified: {csv_file_path}")
             logger.info(f"CSV file size: {os.path.getsize(csv_file_path)} bytes")
