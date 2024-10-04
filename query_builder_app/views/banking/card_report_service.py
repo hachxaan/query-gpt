@@ -1,3 +1,4 @@
+import json
 import os
 import sys
 import psycopg2
@@ -166,6 +167,8 @@ def generate_csv_card_report():
         sys.stdout.flush()
         solid_report_data = get_solid_report_data()
         logger.info(f"Retrieved {len(solid_report_data)} records from Solid Report API")
+        logger.info("Sample data:--------------------------")
+        logger.info(json.dumps(solid_report_data[0], indent=4))
         sys.stdout.flush()
 
         # Obtener datos de la base de datos de la plataforma
