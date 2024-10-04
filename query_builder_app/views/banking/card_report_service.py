@@ -37,7 +37,7 @@ logger.addHandler(RealTimeHandler(sys.stdout))
 
 # The query_platform now uses the new view
 query_platform = """
-    SELECT * FROM vw_users_with_companies_full_v1 WHERE users_customer_uuid IS NOT NULL;
+    SELECT * FROM vw_users_with_companies_full WHERE users_customer_uuid IS NOT NULL;
 """
 
 # API configuration for Solid Report
@@ -123,6 +123,17 @@ def get_solid_report_data():
     response.raise_for_status()
     return response.json()
 
+# query_builder_app/views/banking/card_report_service.py
+
+import csv
+import os
+import tempfile
+from datetime import datetime
+import logging
+import requests
+
+logger = logging.getLogger(__name__)
+
 def generate_csv_card_report():
     temp_dir = '/home/administrador/temp-files'
     if not os.access(temp_dir, os.W_OK):
@@ -162,7 +173,7 @@ def generate_csv_card_report():
             return None
 
         # Create a dictionary to store platform data keyed by user_id
-        platform_dict = {row[0]: row for row in platform_data}
+        platform_dict = {str(row[0]): row for row in platform_data}
         logger.info(f"Created platform dictionary with {len(platform_dict)} entries")
 
         # Combine data and write to CSV
@@ -171,39 +182,41 @@ def generate_csv_card_report():
             csvwriter = csv.writer(csvfile, quotechar='"', quoting=csv.QUOTE_ALL)
             
             # Write header
-            header = list(solid_report_data[0].keys()) + [col for col in platform_columns if col != 'user_id']
+            solid_report_headers = list(solid_report_data[0].keys())
+            platform_headers = [col for col in platform_columns if col != 'user_id']
+            header = solid_report_headers + platform_headers
             csvwriter.writerow(header)
             logger.info(f"CSV header written: {', '.join(header)}")
 
             # Write data rows
             for row_num, solid_row in enumerate(solid_report_data, start=1):
                 try:
-                    # Intenta obtener el user_id de diferentes campos posibles
-                    user_id = solid_row.get('customer_userId') or solid_row.get('userId') or solid_row.get('user_id')
+                    # Corregir el desplazamiento de datos
+                    corrected_solid_row = {}
+                    wallet_id_index = solid_report_headers.index('walletId')
+                    for i, key in enumerate(solid_report_headers):
+                        if i <= wallet_id_index:
+                            corrected_solid_row[key] = solid_row.get(key, '')
+                        else:
+                            corrected_solid_row[key] = solid_row.get(solid_report_headers[i-1], '')
                     
-                    if user_id is None:
-                        # Si no se encuentra el user_id, registra los campos disponibles para debugging
-                        logger.warning(f"No userId found in Solid Report data for row {row_num}. Available fields: {', '.join(solid_row.keys())}")
+                    # Obtener el user_id del campo correcto
+                    user_id = str(corrected_solid_row.get('customer_userId'))
+                    
+                    if user_id is None or user_id == '':
+                        logger.warning(f"No valid customer_userId found in Solid Report data for row {row_num}. Available fields: {', '.join(corrected_solid_row.keys())}")
                         continue
 
                     platform_row = platform_dict.get(user_id)
                     
                     if platform_row:
-                        combined_row = [str(value) for value in solid_row.values()]  # Convert all values to strings
-                        for i, value in enumerate(platform_row[1:]):
-                            if i + len(solid_row) < len(header):
-                                column_name = header[i + len(solid_row)]
-                                if column_name.startswith('_'):
-                                    decrypted_value = decrypt_value(value, row_num, column_name)
-                                    combined_row.append(str(decrypted_value))
-                                else:
-                                    combined_row.append(str(value))
+                        combined_row = [str(corrected_solid_row.get(key, '')) for key in solid_report_headers]
+                        for value in platform_row[1:]:  # Excluir user_id que ya está en solid_row
+                            if isinstance(value, str) and value.startswith('_'):
+                                decrypted_value = decrypt_value(value, row_num, value)
+                                combined_row.append(str(decrypted_value))
                             else:
-                                logger.warning(f"Warning: Skipping extra column in platform data for row {row_num}")
-                        
-                        if len(combined_row) < len(header):
-                            logger.warning(f"Warning: Row {row_num} has fewer columns than expected. Padding with empty strings.")
-                            combined_row.extend([''] * (len(header) - len(combined_row)))
+                                combined_row.append(str(value))
                         
                         csvwriter.writerow(combined_row)
                         records_processed += 1
@@ -211,7 +224,7 @@ def generate_csv_card_report():
                         if records_processed % 1000 == 0:
                             logger.info(f"Processed {records_processed} records")
                     else:
-                        logger.warning(f"Warning: No platform data found for user_id {user_id} in row {row_num}")
+                        logger.warning(f"Warning: No platform data found for customer_userId {user_id} in row {row_num}")
                 except Exception as e:
                     logger.error(f"Error processing row {row_num}: {str(e)}", exc_info=True)
 
