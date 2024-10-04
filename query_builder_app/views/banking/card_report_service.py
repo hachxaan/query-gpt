@@ -212,7 +212,7 @@ def generate_csv_card_report():
                     if platform_row:
                         combined_row = [str(corrected_solid_row.get(key, '')) for key in solid_report_headers]
                         for value in platform_row[1:]:  # Excluir user_id que ya está en solid_row
-                            if not isinstance(value, str) and value.startswith('_'):
+                            if value.startswith('_'):
                                 decrypted_value = decrypt_value(value, row_num, value)
                                 combined_row.append(str(decrypted_value))
                             else:
