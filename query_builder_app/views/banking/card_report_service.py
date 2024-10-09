@@ -116,17 +116,38 @@ def write_csv_file(header, rows, csv_file_path):
         for row in rows:
             csvwriter.writerow(row)
 
+def normalize_solid_report_data(solid_report_data):
+    """Asegura que todos los registros del Solid Report tengan las mismas claves."""
+    # Obtener todas las claves posibles de todos los registros
+    all_keys = set()
+    for record in solid_report_data:
+        all_keys.update(record.keys())
+
+    # Convertir las claves en una lista ordenada para consistencia
+    all_keys = sorted(all_keys)
+
+    # Normalizar cada registro, añadiendo claves faltantes con valor None o vacío
+    normalized_data = []
+    for record in solid_report_data:
+        normalized_record = {key: record.get(key, None) for key in all_keys}
+        normalized_data.append(normalized_record)
+
+    return normalized_data, all_keys
+
 def process_data(solid_report_data, platform_data, platform_columns):
     """Combinar los datos del Solid Report y la plataforma, manejando la desencriptación."""
     platform_dict = {row[platform_columns.index('users_id')]: row for row in platform_data}
     combined_rows = []
 
-    for row_num, solid_row in enumerate(solid_report_data, start=1):
+    # Normalizamos el solid_report_data
+    normalized_solid_report_data, solid_report_columns = normalize_solid_report_data(solid_report_data)
+
+    for row_num, solid_row in enumerate(normalized_solid_report_data, start=1):
         user_id = solid_row.get('customer_userId')
         platform_row = platform_dict.get(user_id)
 
         if platform_row:
-            combined_row = list(solid_row.values())
+            combined_row = list(solid_row.values())  # Valores del Solid Report
             for i, value in enumerate(platform_row):
                 column_name = platform_columns[i]
                 if column_name.startswith(('users__', 'companies__', 'peo_company__')):
@@ -135,14 +156,14 @@ def process_data(solid_report_data, platform_data, platform_columns):
                 else:
                     combined_row.append(value)
 
-            if len(combined_row) < len(solid_row) + len(platform_columns):
-                combined_row.extend([None] * ((len(solid_row) + len(platform_columns)) - len(combined_row)))
+            # Asegurar que el número de columnas sea consistente
+            if len(combined_row) < len(solid_report_columns) + len(platform_columns):
+                combined_row.extend([None] * ((len(solid_report_columns) + len(platform_columns)) - len(combined_row)))
 
             combined_rows.append(combined_row)
         else:
             logger.warning(f"No platform data found for user_id {user_id} in row {row_num}")
 
-    return combined_rows
 
 def generate_csv_card_report():
     temp_dir = '/home/administrador/temp-files'
@@ -167,8 +188,6 @@ def generate_csv_card_report():
         sys.stdout.flush()
         solid_report_data = get_solid_report_data()
         logger.info(f"Retrieved {len(solid_report_data)} records from Solid Report API")
-        logger.info("Sample data:--------------------------")
-        logger.info(json.dumps(solid_report_data[0,10], indent=4))
         sys.stdout.flush()
 
         # Obtener datos de la base de datos de la plataforma
@@ -180,53 +199,23 @@ def generate_csv_card_report():
         logger.info(f"Retrieved {len(platform_data)} records from platform")
         sys.stdout.flush()
 
-        # Crear un diccionario con los datos de la plataforma
-        platform_dict = {row[platform_columns.index('users_id')]: row for row in platform_data}
-        logger.info(f"Created platform dictionary with {len(platform_dict)} entries")
-        sys.stdout.flush()
-
         # Procesar los datos y escribir en CSV
-        records_processed = 0
+        combined_rows, solid_report_columns = process_data(solid_report_data, platform_data, platform_columns)
+
         with open(csv_file_path, 'w', newline='', encoding='utf-8') as csvfile:
-            # Cambiamos el delimitador a ';' y usamos QUOTE_ALL para evitar desplazamientos
             csvwriter = csv.writer(csvfile, delimiter=';', quoting=csv.QUOTE_ALL)
             
             # Escribir encabezado
-            header = list(solid_report_data[0].keys()) + platform_columns
+            header = solid_report_columns + platform_columns
             csvwriter.writerow(header)
             logger.info(f"CSV header written: {', '.join(header)}")
             sys.stdout.flush()
 
             # Escribir filas de datos
-            for row_num, solid_row in enumerate(solid_report_data, start=1):
-                try:
-                    user_id = solid_row.get('customer_userId')
-                    platform_row = platform_dict.get(user_id)
-                    
-                    if platform_row:
-                        combined_row = list(solid_row.values())
-                        for i, value in enumerate(platform_row):
-                            column_name = platform_columns[i]
-                            if column_name.startswith(('users__', 'companies__', 'peo_company__')):
-                                decrypted_value = decrypt_value(value, row_num, column_name)
-                                combined_row.append(decrypted_value)
-                            else:
-                                combined_row.append(value)
+            for combined_row in combined_rows:
+                csvwriter.writerow(combined_row)
 
-                        csvwriter.writerow(combined_row)
-                        records_processed += 1
-                        
-                        if records_processed % 1000 == 0:
-                            logger.info(f"Processed {records_processed} records")
-                            sys.stdout.flush()
-                    else:
-                        logger.warning(f"No platform data found for user_id {user_id} in row {row_num}")
-                        sys.stdout.flush()
-                except Exception as e:
-                    logger.error(f"Error processing row {row_num}: {str(e)}", exc_info=True)
-                    sys.stdout.flush()
-
-        logger.info(f"Total records processed and written to CSV: {records_processed}")
+        logger.info(f"Total records processed and written to CSV: {len(combined_rows)}")
         sys.stdout.flush()
 
         # Cerrar conexiones de la base de datos
