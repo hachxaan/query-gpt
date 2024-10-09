@@ -147,7 +147,7 @@ def process_data(solid_report_data, platform_data, platform_columns):
         platform_row = platform_dict.get(user_id)
 
         if platform_row:
-            combined_row = list(solid_row.values())  # Valores del Solid Report
+            combined_row = [solid_row.get(key, None) for key in solid_report_columns]  # Valores del Solid Report
             for i, value in enumerate(platform_row):
                 column_name = platform_columns[i]
                 if column_name.startswith(('users__', 'companies__', 'peo_company__')):
@@ -164,6 +164,8 @@ def process_data(solid_report_data, platform_data, platform_columns):
         else:
             logger.warning(f"No platform data found for user_id {user_id} in row {row_num}")
 
+    # **Asegúrate de agregar esta línea para devolver los resultados**
+    return combined_rows, solid_report_columns
 
 def generate_csv_card_report():
     temp_dir = '/home/administrador/temp-files'
