@@ -139,7 +139,7 @@ def insert_accounts(records):
     print(f"Puerto: {DB_PORT}")
     print(f"Base de datos: {DB_NAME}")
 
-    
+
     cursor = connection.cursor()
 
     insert_query = f"""
@@ -183,10 +183,9 @@ def insert_accounts(records):
         type = EXCLUDED.type;
     """
 
-    for index, record in enumerate(records):
+    for record in records:
         try:
-            if index == 30:
-                break
+
             user_id = get_user_id(record["id"])
             
             cursor.execute(insert_query, {
