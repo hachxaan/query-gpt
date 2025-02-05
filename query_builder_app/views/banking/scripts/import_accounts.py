@@ -9,24 +9,25 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Configuración de base de datos
-DB_USER = os.getenv("POSTGRES_USER_PLATFORM")
-DB_PASSWORD = os.getenv("POSTGRES_PASSWORD_PLATFORM")
-DB_NAME = os.getenv("POSTGRES_DB_PLATFORM")
-DB_HOST = os.getenv("POSTGRES_DNS_PLATFORM")
-DB_PORT = os.getenv("POSTGRES_PORT_PLATFORM")
+DB_USER = os.getenv("POSTGRES_USER")
+DB_PASSWORD = os.getenv("POSTGRES_PASSWORD")
+DB_NAME = os.getenv("POSTGRES_DB")
+DB_HOST = os.getenv("POSTGRES_DNS")
+DB_PORT = os.getenv("POSTGRES_PORT")
+
 
 # Configuración de base de datos operacional
-OP_POSTGRES_USER = os.getenv('OP_POSTGRES_USER')
-OP_POSTGRES_PASSWORD = os.getenv('OP_POSTGRES_PASSWORD')
-OP_POSTGRES_DB = os.getenv('OP_POSTGRES_DB')
-OP_POSTGRES_DNS = os.getenv('OP_POSTGRES_DNS')
-OP_POSTGRES_PORT = os.getenv('OP_POSTGRES_PORT')
+OP_POSTGRES_USER = os.getenv('OPERATION_USER')
+OP_POSTGRES_PASSWORD = os.getenv('OPERATION_PASSWORD')
+OP_POSTGRES_DB = os.getenv('OPERATION_DB')
+OP_POSTGRES_PORT = os.getenv('OPERATION_PORT')
+OP_POSTGRES_DNS = os.getenv('OPERATION_DNS')
 
 # Configuración de la API
 SOLID_API_KEY = os.getenv("SOLID_API_KEY")
-SOLID_BASE_URL = os.getenv("SOLID_URL")
-PROGRAM_ID = os.getenv("SOLID_PROGRAM_ID")
-SD_PERSON_ID = os.getenv("PERSON_EWA")
+SOLID_BASE_URL = os.getenv("SOLID_BASE_URL")
+PROGRAM_ID = os.getenv("PROGRAM_ID")
+SD_PERSON_ID = os.getenv("SD_PERSON_ID")
 
 # Archivo JSON local
 JSON_FILE_PATH = "accounts_data.json"
@@ -86,6 +87,8 @@ class AccountsApiService:
             json.dump(self.records, file, indent=2)
 
         return self.records
+
+
 
 def get_user_id(account_id):
     connection = psycopg2.connect(
@@ -210,7 +213,7 @@ def insert_accounts(records):
     cursor.close()
     connection.close()
 
-def main():
+def import_accounts_from_solid():
     print("Iniciando importación de cuentas...")
     
     clean_accounts_table()
@@ -230,5 +233,3 @@ def main():
 
     print("Importación de cuentas completada.")
 
-if __name__ == "__main__":
-    main()
