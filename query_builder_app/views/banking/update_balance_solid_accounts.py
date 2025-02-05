@@ -1,6 +1,7 @@
 from django.http import HttpResponse, FileResponse
 from django.views import View
 import os
+import traceback
 import logging
 from .migration_balance_service import generate_migration_balance_report
 from .scripts.import_accounts import import_accounts_from_solid
