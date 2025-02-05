@@ -1,9 +1,9 @@
 from django.http import HttpResponse, FileResponse
 from django.views import View
 import os
-import traceback
 import logging
 from .migration_balance_service import generate_migration_balance_report
+from .scripts.import_accounts import import_accounts_from_solid
 
 logger = logging.getLogger(__name__)
 
@@ -11,6 +11,10 @@ class UpdateBalanceSolidAccounts(View):
     def get(self, request, *args, **kwargs):
         csv_file_path = None
         try:
+            logger.info("Starting import accounts from Solid...")
+            import_accounts_from_solid()
+            logger.info("Import completed successfully")
+
             logger.info("Starting migration balance report generation...")
             csv_file_path = generate_migration_balance_report()
             
