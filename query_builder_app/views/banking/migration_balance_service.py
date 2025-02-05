@@ -30,7 +30,7 @@ query_migration = """
     JOIN companies c ON c.id = u.company_id
     LEFT JOIN user_accounts_solid_temp dsolid ON dsolid.user_id = u.id
     WHERE u."_flags" ->> 'migration_status' in ('started', 'declined')
-    ORDER BY white_label_tag, u.first_name
+    ORDER BY u."_flags" ->> 'migration_status', white_label_tag
 """
 
 
