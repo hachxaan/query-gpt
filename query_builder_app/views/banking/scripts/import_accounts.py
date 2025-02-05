@@ -119,6 +119,13 @@ def clean_accounts_table():
     cursor = connection.cursor()
     
     print("Limpiando tabla user_accounts_solid_temp...")
+    print(f"Tabla: {TABLE_NAME}")
+    print(f"Usuario: {DB_USER}")
+    print(f"Contraseña: {DB_PASSWORD}")
+    print(f"Host: {DB_HOST}")
+    print(f"Puerto: {DB_PORT}")
+    print(f"Base de datos: {DB_NAME}")
+    
     cursor.execute(f"TRUNCATE TABLE {TABLE_NAME}")
     connection.commit()
     
