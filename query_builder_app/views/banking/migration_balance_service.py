@@ -33,6 +33,44 @@ query_migration = """
     ORDER BY white_label_tag, u.first_name
 """
 
+
+DB_KEY = os.getenv('DB_KEY')
+
+class FernetSingleton:
+    class __FernetSingleton:
+        def __init__(self):
+            key_bytes = DB_KEY.encode('utf-8')
+            self.fernet = Fernet(key_bytes)
+    
+    instance = None
+
+    def __init__(self):
+        if not FernetSingleton.instance:
+            FernetSingleton.instance = FernetSingleton.__FernetSingleton().fernet
+
+    def __getattr__(self, name):
+        return getattr(self.instance, name)
+
+fernet = FernetSingleton()
+
+def decrypt_value(value, row_number, field_name):
+    try:
+        if value is None:
+            return None
+        if isinstance(value, memoryview):
+            value = value.tobytes()
+        if isinstance(value, bytes):
+            return fernet.decrypt(value).decode("utf-8")
+        elif isinstance(value, str):
+            value_bytes = base64.urlsafe_b64decode(value)
+            return fernet.decrypt(value_bytes).decode("utf-8")
+        else:
+            logger.warning(f"Unsupported value type for decryption in {field_name}, row {row_number}: {type(value)}")
+            return str(value)
+    except Exception as e:
+        logger.error(f"Error decrypting {field_name} in row {row_number}: {e}")
+        return str(value)
+
 def generate_migration_balance_report():
     temp_dir = '/home/administrador/temp-files'
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
