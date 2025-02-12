@@ -53,11 +53,11 @@ class AccountsApiService:
         }
 
     def fetch_all(self):
-        if os.path.exists(JSON_FILE_PATH):
-            print("Cargando datos desde archivo JSON local...")
-            with open(JSON_FILE_PATH, 'r') as file:
-                self.records = json.load(file)
-            return self.records
+        # if os.path.exists(JSON_FILE_PATH):
+        #     print("Cargando datos desde archivo JSON local...")
+        #     with open(JSON_FILE_PATH, 'r') as file:
+        #         self.records = json.load(file)
+        #     return self.records
 
         print("Obteniendo datos desde la API...")
         while True:
@@ -148,7 +148,7 @@ def insert_accounts(records):
         available_balance, business_id, config, created_at, created_person_id,
         currency, family_id, fees, interest, is_verified, label, metadata,
         modified_at, pending_credit, pending_debit, program_id,
-        sponsor_bank_name, status, type
+        sponsor_bank_name, status, type, account_number
     )
     VALUES (
         %(id)s, %(user_id)s, %(acceptedTerms)s, %(accountInterestFrequency)s,
@@ -156,7 +156,7 @@ def insert_accounts(records):
         %(createdPersonId)s, %(currency)s, %(familyId)s, %(fees)s, %(interest)s,
         %(isVerified)s, %(label)s, %(metadata)s, %(modifiedAt)s, %(pendingCredit)s,
         %(pendingDebit)s, %(programId)s, %(sponsorBankName)s,
-        %(status)s, %(type)s
+        %(status)s, %(type)s, %(accountNumber)s
     )
     ON CONFLICT (id) DO UPDATE SET
         user_id = EXCLUDED.user_id,
@@ -211,7 +211,8 @@ def insert_accounts(records):
                 "programId": record["programId"],
                 "sponsorBankName": record["sponsorBankName"],
                 "status": record["status"],
-                "type": record["type"]
+                "type": record["type"],
+                "accountNumber": record["accountNumber"]
             })
             print(f"Cuenta {record['id']} insertada con user_id: {user_id}")
         except Exception as e:
