@@ -21,6 +21,7 @@ query_migration = """
     u."_flags" ->> 'migration_status',
     dsolid.available_balance,
     dsolid.id AS "accountId",
+    dsolid.account_number,
     dsolid.created_person_id AS "personId",
     dsolid.status,
     dsolid."type",
