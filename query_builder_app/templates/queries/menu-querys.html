@@ -1,13 +1,95 @@
 <!-- Sidebar -->
 <div class="bg-light border-right" id="sidebar-wrapper">
+    <style>
+        #sidebar-wrapper {
+            background: rgba(255, 255, 255, 0.1) !important;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+            min-height: 100vh;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar-heading {
+            color: white;
+            font-size: 1.2rem;
+            padding: 1.5rem 1rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .list-group-item-action {
+            background: rgba(255, 255, 255, 0.1) !important;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 0.5rem;
+            color: white !important;
+            transition: all 0.3s ease;
+        }
+
+        .list-group-item-action:hover {
+            background: rgba(255, 255, 255, 0.2) !important;
+            transform: translateX(5px);
+        }
+
+        .list-group-item-action.active {
+            background: rgba(255, 255, 255, 0.25) !important;
+            border-color: rgba(255, 255, 255, 0.4);
+            font-weight: bold;
+        }
+
+        .list-group {
+            padding: 1rem;
+        }
+
+        /* Ajustes responsivos */
+        @media (max-width: 768px) {
+            #sidebar-wrapper {
+                position: fixed;
+                z-index: 1000;
+                width: 250px;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease-in-out;
+            }
+
+            #sidebar-wrapper.active {
+                transform: translateX(0);
+            }
+
+            .sidebar-heading {
+                padding: 1rem;
+                font-size: 1.1rem;
+            }
+
+            .list-group-item-action {
+                padding: 0.75rem 1rem;
+            }
+        }
+    </style>
+
     <div class="sidebar-heading">Menú</div>
     <div class="list-group list-group-flush">
-        <!-- Usar la variable current_path para aplicar la clase active -->
-        <a href="{% url 'home' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'home' %}active{% else %}bg-light{% endif %}">Home</a>
-        <a href="{% url 'query_list_download' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'query_list_download' %}active{% else %}bg-light{% endif %}">Download Queries</a>
-        <a href="{% url 'query_list' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'query_list' %}active{% else %}bg-light{% endif %}">Queries Manager</a>
-        <a href="{% url 'audiences' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'audiences' %}active{% else %}bg-light{% endif %}">Audiences</a>
-        <a href="{% url 'banking' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'banking' %}active{% else %}bg-light{% endif %}">Banking</a>
+        <a href="{% url 'home' %}" 
+           class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+           Home
+        </a>
+        <a href="{% url 'query_list_download' %}" 
+           class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'query_list_download' %}active{% endif %}">
+           Download Queries
+        </a>
+        <a href="{% url 'query_list' %}" 
+           class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'query_list' %}active{% endif %}">
+           Queries Manager
+        </a>
+        <a href="{% url 'audiences' %}" 
+           class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'audiences' %}active{% endif %}">
+           Audiences
+        </a>
+        <a href="{% url 'banking' %}" 
+           class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'banking' %}active{% endif %}">
+           Banking
+        </a>
     </div>
 </div>
 <!-- /#sidebar-wrapper -->
