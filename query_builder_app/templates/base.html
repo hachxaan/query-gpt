@@ -98,6 +98,43 @@
             50% { transform: translateY(-20px) rotate(180deg); }
             100% { transform: translateY(0px) rotate(360deg); }
         }
+
+        /* Hacer transparente el container-fluid */
+        .container-fluid {
+            background: transparent !important;
+        }
+
+        /* Ajustar el contenido dentro del container-fluid */
+        .card, 
+        .card-header, 
+        .card-body {
+            background: rgba(255, 255, 255, 0.1) !important;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Ajustar colores de texto para mejor contraste */
+        .card {
+            color: white;
+        }
+
+        .card-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Ajustar tablas dentro de cards */
+        .table {
+            color: white;
+        }
+
+        .table thead th {
+            border-bottom-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .table td, .table th {
+            border-top-color: rgba(255, 255, 255, 0.2);
+        }
     </style>
 
     {% block extra_css %}{% endblock %}
