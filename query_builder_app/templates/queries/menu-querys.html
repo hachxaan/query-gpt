@@ -10,6 +10,7 @@
             position: sticky;
             top: 0;
             height: 100vh;
+            width: 300px !important; /* Aumentado de ~150px a 300px */
             overflow-y: auto;
         }
 
@@ -26,6 +27,8 @@
             margin-bottom: 0.5rem;
             color: white !important;
             transition: all 0.3s ease;
+            padding: 1rem 1.5rem; /* Aumentado el padding horizontal */
+            font-size: 1.1rem; /* Aumentado el tamaño de fuente */
         }
 
         .list-group-item-action:hover {
@@ -48,7 +51,7 @@
             #sidebar-wrapper {
                 position: fixed;
                 z-index: 1000;
-                width: 250px;
+                width: 300px !important; /* Mantenemos el mismo ancho en móvil */
                 transform: translateX(-100%);
                 transition: transform 0.3s ease-in-out;
             }
