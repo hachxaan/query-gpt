@@ -29,10 +29,37 @@
 
     .queries-grid {
         display: grid;
-        gap: 2rem;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* OPCIÓN PREDETERMINADA (RECOMENDADA) */
+        gap: 1.5rem;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        padding: 0.5rem;
     }
 
+    /* Ajustes responsivos */
+    @media (min-width: 576px) {
+        .queries-grid {
+            grid-template-columns: repeat(1, 1fr);
+        }
+    }
+
+    @media (min-width: 768px) {
+        .queries-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (min-width: 992px) {
+        .queries-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    @media (min-width: 1200px) {
+        .queries-grid {
+            grid-template-columns: repeat(4, 1fr);
+        }
+    }
+
+    /* Ajustes para las tarjetas */
     .query-card {
         background: rgba(255, 255, 255, 0.1);
         backdrop-filter: blur(10px);
@@ -42,6 +69,9 @@
         border-radius: 12px;
         overflow: hidden;
         transition: transform 0.3s ease, box-shadow 0.3s ease;
+        width: 100%;
+        min-width: 250px;
+        margin: 0 auto;
     }
 
     .query-card:hover {
@@ -100,6 +130,50 @@
 
     .download-icon {
         font-size: 1rem;
+    }
+
+    /* Ajustes responsivos para el contenedor */
+    @media (max-width: 768px) {
+        .container-fluid {
+            padding: 1rem;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .query-card-header {
+            padding: 1.25rem;
+        }
+
+        .query-title {
+            font-size: 1.1rem;
+        }
+
+        .query-description {
+            font-size: 0.9rem;
+        }
+    }
+
+    /* Ajustes para dispositivos muy pequeños */
+    @media (max-width: 576px) {
+        .queries-grid {
+            gap: 1rem;
+        }
+
+        .query-card-header {
+            padding: 1rem;
+        }
+
+        .query-card-footer {
+            padding: 1rem;
+        }
+
+        .download-button {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
     }
 </style>
 
