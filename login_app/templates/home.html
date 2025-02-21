@@ -1,7 +1,7 @@
 {% load static %}
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="UTF-8">
@@ -11,53 +11,47 @@
 </head>
 
 <body>
-    <div class="px-4 grid gap-6 md:grid-cols-2 lg:gap-10 xl:grid-cols-4">
-        <div class="flex flex-col rounded-lg overflow-hidden">
-            <a class="flex-1" href="{% url 'query_list_download' %}" title="Query Builder">
-                <div class="rounded-lg border bg-card text-card-foreground shadow-sm flex flex-col h-full"
-                    data-v0-t="card">
-                    <div class="flex-1 p-6">
-                        <div class="space-y-2">
-                            <h3 class="text-lg font-semibold">Query Builder</h3>
-                            <p class="text-sm leading-none text-gray-500">
-                                Natural language query builder
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
-        <div class="flex flex-col rounded-lg overflow-hidden">
-            <a class="flex-1" href="{% url 'mailing_campaign_list' %}" title="Query Builder">
-                <div class="rounded-lg border bg-card text-card-foreground shadow-sm flex flex-col h-full"
-                    data-v0-t="card">
-                    <div class="flex-1 p-6">
-                        <div class="space-y-2">
-                            <h3 class="text-lg font-semibold">Campaign HTML Builder</h3>
-                            <p class="text-sm leading-none text-gray-500">
-                                Create the HTML for the campaigns from a CSV file.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
-        <div class="flex flex-col rounded-lg overflow-hidden">
-            <a class="flex-1" href="{% url 'dashboard_builder_app:home' %}" title="Dashboard Builder">
-                <div class="rounded-lg border bg-card text-card-foreground shadow-sm flex flex-col h-full"
-                    data-v0-t="card">
-                    <div class="flex-1 p-6">
-                        <div class="space-y-2">
-                            <h3 class="text-lg font-semibold">Dashboard Builder</h3>
-                            <p class="text-sm leading-none text-gray-500">
-                                Create intuitive and powerful dashboards powered by artificial intelligence.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
+    <div class="background">
+        <div class="shapes"></div>
     </div>
+    
+    <main class="container">
+        <h1 class="main-title">Panel de Control</h1>
+        <div class="glass-grid">
+            <div class="glass-card">
+                <a href="{% url 'query_list_download' %}" class="card-content">
+                    <div class="card-body">
+                        <h3 class="card-title">Query Builder</h3>
+                        <p class="card-text">
+                            Natural language query builder
+                        </p>
+                    </div>
+                </a>
+            </div>
+
+            <div class="glass-card">
+                <a href="{% url 'mailing_campaign_list' %}" class="card-content">
+                    <div class="card-body">
+                        <h3 class="card-title">Campaign HTML Builder</h3>
+                        <p class="card-text">
+                            Create the HTML for the campaigns from a CSV file.
+                        </p>
+                    </div>
+                </a>
+            </div>
+
+            <div class="glass-card">
+                <a href="{% url 'dashboard_builder_app:home' %}" class="card-content">
+                    <div class="card-body">
+                        <h3 class="card-title">Dashboard Builder</h3>
+                        <p class="card-text">
+                            Create intuitive and powerful dashboards powered by artificial intelligence.
+                        </p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </main>
 </body>
 
 </html>
