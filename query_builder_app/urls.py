@@ -3,6 +3,7 @@
 from django.urls import path
 
 from query_builder_app.views.banking.card_report_view import GenerateAndDownloadCSVCardsView
+from query_builder_app.views.banking.update_balance_solid_accounts import UpdateBalanceSolidAccounts
 from query_builder_app.views.mailing_audiencias.views import GenerateAndDownloadCSVAudiencesView
 from query_builder_app.views.query_list import  query_list, query_create, query_update, query_delete, get_query_from_gpt
 from query_builder_app.views.query_list_download import query_list_download, download_results
@@ -25,6 +26,7 @@ urlpatterns = [
     path('generate-csv-audiences/', GenerateAndDownloadCSVAudiencesView.as_view(), name='generate_csv_audiences'),
     path('audiences/', TemplateView.as_view(template_name='queries/audiences.html'), name='audiences'),
     
+    path('update-balance-solid-accounts/', UpdateBalanceSolidAccounts.as_view(), name='update_balance_solid_accounts'),
     path('generate-csv-cards/', GenerateAndDownloadCSVCardsView.as_view(), name='generate_csv_cards'),
     path('banking/', TemplateView.as_view(template_name='queries/banking-reports.html'), name='banking'),
 ]

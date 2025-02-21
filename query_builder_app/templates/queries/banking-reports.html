@@ -2,26 +2,64 @@
 {% load static %}
 
 {% block content %}
-<!-- Begin Page Content -->
 <div class="d-flex" id="wrapper">
-  <!-- Sidebar -->
-  {% include 'queries/menu-querys.html' %}
-
-  <!-- Page Content -->
-  <div id="page-content-wrapper">
-    <div class="container-fluid">
-      <h1 class="mt-4">Banking</h1>
-      <p>
-        <a href="{% url 'generate_csv_cards' %}" class="btn btn-primary" role="button">
-          Merge Solid Cards with Platform Users
-        </a>
-      </p>
-
-      <!-- Future options go here -->
-      <div class="future-options">
-        <!-- Placeholder for future options -->
-      </div>
-    </div>
+{% include 'queries/menu-querys.html' %}
+<div id="page-content-wrapper">
+  <div class="container-fluid">
+    <h1 class="mt-4">Banking</h1>
+    <p>
+      <a href="{% url 'generate_csv_cards' %}" class="btn btn-primary" role="button">
+        Merge Solid Cards with Platform Users
+      </a>
+    </p>
+    <p>
+      <a href="{% url 'update_balance_solid_accounts' %}" 
+         class="btn btn-primary" 
+         role="button" 
+         id="updateBalanceBtn"
+         onclick="handleBalanceUpdate(event)">
+        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true" id="balanceSpinner"></span>
+        <span id="btnText">Get balance of Solid Accounts (User in migrations)</span>
+      </a>
+    </p>
   </div>
 </div>
+</div>
+
+<script>
+function handleBalanceUpdate(event) {
+  event.preventDefault();
+  const btn = document.getElementById('updateBalanceBtn');
+  const spinner = document.getElementById('balanceSpinner');
+  const btnText = document.getElementById('btnText');
+    
+  btn.disabled = true;
+  spinner.classList.remove('d-none');
+    
+  fetch(btn.href)
+      .then(response => {
+          if (response.ok) {
+              return response.blob();
+          }
+          throw new Error('Network response was not ok');
+      })
+      .then(blob => {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'migration_balance_report.csv';
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+      })
+      .catch(error => {
+          console.error('Error:', error);
+          alert('Error generating report. Please try again.');
+      })
+      .finally(() => {
+          btn.disabled = false;
+          spinner.classList.add('d-none');
+      });
+}
+</script>
 {% endblock %}
