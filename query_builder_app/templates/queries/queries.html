@@ -4,31 +4,32 @@
 {% block content %}
 <style>
     body {
-        background: #f8f9fa;
-        min-height: 100vh;
+        background: linear-gradient(45deg, #1a2980, #26d0ce);
+        background-attachment: fixed;
+        color: white;
     }
 
     #wrapper {
-        background: transparent;  /* Cambiado de #fff a transparent */
+        background: transparent;
     }
 
     .container-fluid {
         padding: 2rem;
         max-width: 100%;
-        background: transparent !important; /* Agregado transparent */
+        background: transparent !important;
     }
 
     .page-title {
-        color: white;  /* Cambiado para mejor contraste */
-        font-size: 1.75rem;
-        margin-bottom: 1.5rem;
+        font-size: 2rem;
+        margin-bottom: 2rem;
         font-weight: 700;
+        text-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
     }
 
     .queries-grid {
         display: grid;
-        grid-template-columns: repeat(4, 1fr); /* Por defecto 4 columnas */
-        gap: 1rem;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
     }
 
     .query-card {
@@ -36,139 +37,23 @@
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
         border: 1px solid rgba(255, 255, 255, 0.2);
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        border-radius: 8px;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        border-radius: 12px;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
     .query-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        transform: translateY(-5px);
+        box-shadow: 0 15px 25px rgba(0, 0, 0, 0.25);
     }
 
     .query-card-header {
-        background: rgba(255, 255, 255, 0.05);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .query-title {
-        color: white;
-        font-size: 1rem;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    }
-
-    .query-description {
-        color: rgba(255, 255, 255, 0.8);
-        font-size: 0.875rem;
-        line-height: 1.4;
-        margin-bottom: 0;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
+        padding: 1.5rem;
+        position: relative;
         overflow: hidden;
     }
 
-    .query-card-footer {
-        padding: 0.75rem;
-        background: #ffffff;
-        display: flex;
-        justify-content: flex-end;
-    }
-
-    .download-button {
-        background: rgba(255, 255, 255, 0.2);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        color: white;
-        border-radius: 4px;
-        padding: 0.5rem 1rem;
-        font-size: 0.875rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        text-decoration: none;
-        transition: background-color 0.2s ease;
-    }
-
-    .download-button:hover {
-        background: rgba(255, 255, 255, 0.3);
-        color: white;
-        text-decoration: none;
-    }
-
-    .download-icon {
-        font-size: 0.875rem;
-    }
-
-    /* Responsive breakpoints mejorados */
-    @media (min-width: 2000px) {
-        .queries-grid {
-            grid-template-columns: repeat(6, 1fr); /* 6 columnas en pantallas muy grandes */
-        }
-    }
-
-    @media (max-width: 1600px) {
-        .queries-grid {
-            grid-template-columns: repeat(5, 1fr); /* 5 columnas en pantallas grandes */
-        }
-    }
-
-    @media (max-width: 1200px) {
-        .queries-grid {
-            grid-template-columns: repeat(4, 1fr); /* 4 columnas en pantallas medianas-grandes */
-        }
-    }
-
-    @media (max-width: 992px) {
-        .queries-grid {
-            grid-template-columns: repeat(3, 1fr); /* 3 columnas en pantallas medianas */
-        }
-    }
-
-    @media (max-width: 768px) {
-        .queries-grid {
-            grid-template-columns: repeat(2, 1fr); /* 2 columnas en tablets */
-        }
-        .container-fluid {
-            padding: 1rem;
-        }
-    }
-
-    @media (max-width: 576px) {
-        .queries-grid {
-            grid-template-columns: 1fr; /* 1 columna en móviles */
-        }
-        .page-title {
-            font-size: 1.5rem;
-        }
-    }
-</style>
-
-<div class="d-flex" id="wrapper">
-    {% include 'queries/menu-querys.html' %}
-
-    <div id="page-content-wrapper">
-        <div class="container-fluid">
-            <h1 class="page-title">Marketing Queries</h1>
-
-            <div class="queries-grid">
-                {% for query in queries %}
-                <div class="query-card">
-                    <div class="query-card-header">
-                        <h2 class="query-title">{{ query.title }}</h2>
-                        <p class="query-description">{{ query.description }}</p>
-                    </div>
-                    <div class="query-card-footer">
-                        <a href="{% url 'download_results' query.id %}" class="download-button">
-                            <i class="fas fa-download download-icon"></i>
-                            <span>Descargar</span>
-                        </a>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
+    .query-title {
+        font-size: 1.25rem;
+        font

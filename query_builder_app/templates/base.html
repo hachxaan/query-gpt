@@ -11,24 +11,18 @@
 
     <title>{% block title %}Query Builder{% endblock %}</title>
 
-    <!-- Custom fonts for this template-->
     <link href="{% static 'vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
     <link
         href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
         rel="stylesheet">
 
-    <!-- Custom styles for this template-->
     <link href="{% static 'css/sb-admin-2.min.css' %}" rel="stylesheet">
 
     <style>
-        /* Agregamos solo los estilos del gradiente y glassmorphic */
         body {
-            background: linear-gradient(
-                45deg,
-                #1a2980,
-                #26d0ce
-            ) !important;
+            background: linear-gradient(45deg, #1a2980, #26d0ce) !important;
             background-attachment: fixed !important;
+            color: white; /* Color de texto base blanco */
         }
 
         .glassmorphic {
@@ -39,7 +33,6 @@
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
 
-        /* Mantenemos el fondo del sidebar */
         .bg-gradient-primary {
             background: rgba(255, 255, 255, 0.15) !important;
             backdrop-filter: blur(10px);
@@ -47,7 +40,6 @@
             border-right: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        /* Ajustamos colores del menú para mejor contraste */
         .sidebar .nav-item .nav-link {
             color: rgba(255, 255, 255, 0.8) !important;
         }
@@ -61,7 +53,6 @@
             color: white !important;
         }
 
-        /* Formas decorativas en el fondo */
         .background-shapes {
             position: fixed;
             width: 100%;
@@ -94,19 +85,25 @@
         }
 
         @keyframes float {
-            0% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(180deg); }
-            100% { transform: translateY(0px) rotate(360deg); }
+            0% {
+                transform: translateY(0px) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-20px) rotate(180deg);
+            }
+
+            100% {
+                transform: translateY(0px) rotate(360deg);
+            }
         }
 
-        /* Hacer transparente el container-fluid */
         .container-fluid {
             background: transparent !important;
         }
 
-        /* Ajustar el contenido dentro del container-fluid */
-        .card, 
-        .card-header, 
+        .card,
+        .card-header,
         .card-body {
             background: rgba(255, 255, 255, 0.1) !important;
             backdrop-filter: blur(10px);
@@ -114,7 +111,6 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        /* Ajustar colores de texto para mejor contraste */
         .card {
             color: white;
         }
@@ -123,7 +119,6 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        /* Ajustar tablas dentro de cards */
         .table {
             color: white;
         }
@@ -132,7 +127,8 @@
             border-bottom-color: rgba(255, 255, 255, 0.2);
         }
 
-        .table td, .table th {
+        .table td,
+        .table th {
             border-top-color: rgba(255, 255, 255, 0.2);
         }
     </style>
@@ -141,7 +137,6 @@
 </head>
 
 <body id="page-top">
-    <!-- Formas decorativas del fondo -->
     <div class="background-shapes">
         <div class="shape"></div>
         <div class="shape"></div>
@@ -149,14 +144,9 @@
 
     {% block content %}{% endblock %}
 
-    <!-- Bootstrap core JavaScript-->
     <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
     <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
-
-    <!-- Core plugin JavaScript-->
     <script src="{% static 'vendor/jquery-easing/jquery.easing.min.js' %}"></script>
-
-    <!-- Custom scripts for all pages-->
     <script src="{% static 'js/sb-admin-2.min.js' %}"></script>
 
     {% block extra_js %}{% endblock %}
