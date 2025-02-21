@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block content %}
+
 <style>
     body {
         background: linear-gradient(45deg, #1a2980, #26d0ce);
@@ -56,4 +57,77 @@
 
     .query-title {
         font-size: 1.25rem;
-        font
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .query-description {
+        font-size: 1rem;
+        line-height: 1.5;
+        color: rgba(255, 255, 255, 0.8);
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .query-card-footer {
+        padding: 1.25rem;
+        background: rgba(0, 0, 0, 0.1);
+        display: flex;
+        justify-content: flex-end;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .download-button {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        border-radius: 6px;
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-decoration: none;
+        transition: background-color 0.3s ease;
+    }
+
+    .download-button:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    .download-icon {
+        font-size: 1rem;
+    }
+</style>
+
+<div class="d-flex" id="wrapper">
+    {% include 'queries/menu-querys.html' %}
+
+    <div id="page-content-wrapper">
+        <div class="container-fluid">
+            <h1 class="page-title">Marketing Queries</h1>
+
+            <div class="queries-grid">
+                {% for query in queries %}
+                <div class="query-card">
+                    <div class="query-card-header">
+                        <h2 class="query-title">{{ query.title }}</h2>
+                        <p class="query-description">{{ query.description }}</p>
+                    </div>
+                    <div class="query-card-footer">
+                        <a href="{% url 'download_results' query.id %}" class="download-button">
+                            <i class="fas fa-download download-icon"></i>
+                            <span>Descargar</span>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
