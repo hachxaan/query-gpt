@@ -4,68 +4,61 @@
 {% block content %}
 <style>
     body {
-        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        background: #f8f9fa;
         min-height: 100vh;
     }
 
     #wrapper {
-        background: transparent;
-    }
-
-    #page-content-wrapper {
-        background: transparent;
+        background: #fff;
     }
 
     .container-fluid {
-        padding: 1.5rem;
+        padding: 2rem;
+        max-width: 100%;
     }
 
     .page-title {
-        color: #ffffff;
-        font-size: 2rem;
+        color: #2c3e50;
+        font-size: 1.75rem;
         margin-bottom: 1.5rem;
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        font-weight: 600;
-        letter-spacing: 0.5px;
+        font-weight: 700;
     }
 
     .queries-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        gap: 1.25rem;
+        grid-template-columns: repeat(4, 1fr); /* Por defecto 4 columnas */
+        gap: 1rem;
     }
 
     .query-card {
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 12px;
-        overflow: hidden;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        backdrop-filter: blur(10px);
+        background: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border: 1px solid #e9ecef;
     }
 
     .query-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-        background: rgba(255, 255, 255, 0.15);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
     }
 
     .query-card-header {
         padding: 1rem;
-        background: rgba(0, 0, 0, 0.2);
+        background: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
     }
 
     .query-title {
-        color: #ffffff;
-        font-size: 1.1rem;
+        color: #2c3e50;
+        font-size: 1rem;
         font-weight: 600;
         margin-bottom: 0.5rem;
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
     }
 
     .query-description {
-        color: rgba(255, 255, 255, 0.8);
-        font-size: 0.9rem;
+        color: #6c757d;
+        font-size: 0.875rem;
         line-height: 1.4;
         margin-bottom: 0;
         display: -webkit-box;
@@ -76,60 +69,75 @@
 
     .query-card-footer {
         padding: 0.75rem;
-        background: rgba(0, 0, 0, 0.1);
+        background: #ffffff;
         display: flex;
         justify-content: flex-end;
     }
 
     .download-button {
-        background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+        background: #0056b3;
         color: white;
         border: none;
-        border-radius: 6px;
+        border-radius: 4px;
         padding: 0.5rem 1rem;
-        font-size: 0.9rem;
+        font-size: 0.875rem;
         display: flex;
         align-items: center;
         gap: 0.5rem;
         text-decoration: none;
-        transition: all 0.3s ease;
+        transition: background-color 0.2s ease;
     }
 
     .download-button:hover {
-        background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
+        background: #004494;
         color: white;
         text-decoration: none;
-        transform: translateY(-1px);
     }
 
     .download-icon {
-        font-size: 1rem;
+        font-size: 0.875rem;
+    }
+
+    /* Responsive breakpoints mejorados */
+    @media (min-width: 2000px) {
+        .queries-grid {
+            grid-template-columns: repeat(6, 1fr); /* 6 columnas en pantallas muy grandes */
+        }
+    }
+
+    @media (max-width: 1600px) {
+        .queries-grid {
+            grid-template-columns: repeat(5, 1fr); /* 5 columnas en pantallas grandes */
+        }
     }
 
     @media (max-width: 1200px) {
         .queries-grid {
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            grid-template-columns: repeat(4, 1fr); /* 4 columnas en pantallas medianas-grandes */
+        }
+    }
+
+    @media (max-width: 992px) {
+        .queries-grid {
+            grid-template-columns: repeat(3, 1fr); /* 3 columnas en pantallas medianas */
         }
     }
 
     @media (max-width: 768px) {
+        .queries-grid {
+            grid-template-columns: repeat(2, 1fr); /* 2 columnas en tablets */
+        }
         .container-fluid {
             padding: 1rem;
-        }
-
-        .queries-grid {
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 1rem;
-        }
-
-        .page-title {
-            font-size: 1.75rem;
         }
     }
 
     @media (max-width: 576px) {
         .queries-grid {
-            grid-template-columns: 1fr;
+            grid-template-columns: 1fr; /* 1 columna en móviles */
+        }
+        .page-title {
+            font-size: 1.5rem;
         }
     }
 </style>
