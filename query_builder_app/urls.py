@@ -8,13 +8,11 @@ from query_builder_app.views.mailing_audiencias.views import GenerateAndDownload
 from query_builder_app.views.query_list import  query_list, query_create, query_update, query_delete, get_query_from_gpt
 from query_builder_app.views.query_list_download import query_list_download, download_results
 from django.views.generic import TemplateView
-from query_builder_app.views.cardholders import cardholders
 
 urlpatterns = [
 
     path("queries", query_list_download, name="query_list_download"),
     path('queries/manager', query_list, name='query_list'),
-    path('cardholders', cardholders, name='cardholders'),
     path('queries/new/', query_create, name='query_create'),
 
     path('queries/<int:query_id>/edit/', query_update, name='query_update'),

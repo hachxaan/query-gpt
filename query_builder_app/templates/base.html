@@ -19,101 +19,129 @@
     <link href="{% static 'css/sb-admin-2.min.css' %}" rel="stylesheet">
 
     <style>
-        :root {
-            --glass-bg: rgba(255, 255, 255, 0.1);
-            --glass-border: rgba(255, 255, 255, 0.2);
-            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            --text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-            --transition-default: all 0.3s ease;
-        }
-
         body {
             background: linear-gradient(45deg, #1a2980, #26d0ce) !important;
             background-attachment: fixed !important;
-            color: white;
-            min-height: 100vh;
+            color: white; /* Color de texto base blanco */
         }
 
         .glassmorphic {
-            background: var(--glass-bg) !important;
+            background: rgba(255, 255, 255, 0.1) !important;
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-            box-shadow: var(--glass-shadow);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
 
-        .page-title {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 2rem;
-            text-shadow: var(--text-shadow);
-            color: white;
-        }
-
-        .btn-glass {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            transition: var(--transition-default);
-        }
-
-        .btn-glass:hover {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            transform: translateY(-2px);
-        }
-
-        .card-glass {
-            background: var(--glass-bg);
+        .bg-gradient-primary {
+            background: rgba(255, 255, 255, 0.15) !important;
             backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
+            -webkit-backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar .nav-item .nav-link {
+            color: rgba(255, 255, 255, 0.8) !important;
+        }
+
+        .sidebar .nav-item .nav-link:hover {
+            color: white !important;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-brand-text {
+            color: white !important;
+        }
+
+        .background-shapes {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
             overflow: hidden;
-            transition: var(--transition-default);
+            pointer-events: none;
         }
 
-        .card-glass:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.25);
-        }
-
-        .form-control {
-            background: rgba(255, 255, 255, 0.15);
-            border: 1px solid var(--glass-border);
-            color: white;
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(5px);
+            animation: float 8s infinite;
         }
 
-        .form-control:focus {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border-color: rgba(255, 255, 255, 0.4);
-            box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.1);
+        .shape:nth-child(1) {
+            width: 300px;
+            height: 300px;
+            top: -150px;
+            right: -150px;
         }
 
-        .table-glass {
-            background: var(--glass-bg);
-            color: white;
+        .shape:nth-child(2) {
+            width: 200px;
+            height: 200px;
+            bottom: -100px;
+            left: -100px;
         }
 
-        .table-glass th,
-        .table-glass td {
-            border-color: var(--glass-border);
+        @keyframes float {
+            0% {
+                transform: translateY(0px) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-20px) rotate(180deg);
+            }
+
+            100% {
+                transform: translateY(0px) rotate(360deg);
+            }
         }
 
-        .modal-glass .modal-content {
-            background: var(--glass-bg);
+        .container-fluid {
+            background: transparent !important;
+        }
+
+        .card,
+        .card-header,
+        .card-body {
+            background: rgba(255, 255, 255, 0.1) !important;
             backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        /* Responsive adjustments */
+        .card {
+            color: white;
+        }
+
+        .card-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .table {
+            color: white;
+        }
+
+        .table thead th {
+            border-bottom-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .table td,
+        .table th {
+            border-top-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Agregar estilos base para el grid responsivo */
+        @media (max-width: 576px) {
+            .container-fluid {
+                padding: 1rem;
+            }
+        }
+
         @media (max-width: 768px) {
-            .page-title {
-                font-size: 1.5rem;
-                margin-bottom: 1.5rem;
+            #wrapper {
+                overflow-x: hidden;
             }
         }
     </style>
