@@ -160,6 +160,14 @@ DATABASES = {
         "HOST": os.getenv("POSTGRES_DNS"),
         "PORT": os.getenv("POSTGRES_PORT"),
     },
+    "banking_operation_db": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("BOPERATION_DB"),
+        "USER": os.getenv("BOPERATION_USER"),
+        "PASSWORD": os.getenv("BOPERATION_PASSWORD"),
+        "HOST": os.getenv("BOPERATION_DNS"),
+        "PORT": os.getenv("BOPERATION_PORT"),
+    },
 }
 
 
