@@ -1,27 +1,28 @@
 {% extends 'base.html' %}
-{% load static %}
-
 {% block content %}
-<!-- Begin Page Content -->
 <div class="d-flex" id="wrapper">
-  <!-- Sidebar -->
-  {% include 'queries/menu-querys.html' %}
+    {% include 'queries/menu-querys.html' %}
+    
+    <div id="page-content-wrapper">
+        <div class="container-fluid">
+            <h1 class="page-title">Audiences</h1>
+            
+            <div class="card-glass mb-4">
+                <div class="card-body">
+                    <a href="{% url 'generate_csv_audiences' %}" class="btn-glass">
+                        <i class="fas fa-download"></i> Download Audiences
+                    </a>
+                </div>
+            </div>
 
-  <!-- Page Content -->
-  <div id="page-content-wrapper">
-    <div class="container-fluid">
-      <h1 class="mt-4">Audiences</h1>
-      <p>
-        <a href="{% url 'generate_csv_audiences' %}" class="btn btn-primary" role="button">
-          Download Audiences
-        </a>
-      </p>
-
-      <!-- Future options go here -->
-      <div class="future-options">
-        <!-- Placeholder for future options -->
-      </div>
+            <div class="card-glass">
+                <div class="card-body">
+                    <div class="future-options">
+                        <!-- Contenido futuro -->
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 {% endblock %}
