@@ -57,7 +57,7 @@
         <div class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'banking' or request.resolver_match.url_name == 'cardholders' %}active{% else %}bg-light{% endif %}" data-bs-toggle="collapse" href="#bankingSubmenu" role="button" aria-expanded="false" aria-controls="bankingSubmenu">
             Banking
         </div>
-        <div class="collapse" id="bankingSubmenu">
+        <div class="collapse {% if request.resolver_match.url_name == 'banking' or request.resolver_match.url_name == 'cardholders' %}show{% endif %}" id="bankingSubmenu">
             <a href="{% url 'banking' %}" class="list-group-item list-group-item-action ps-4 {% if request.resolver_match.url_name == 'banking' %}active{% else %}bg-light{% endif %}">Banking Reports</a>
             <a href="{% url 'cardholders' %}" class="list-group-item list-group-item-action ps-4 {% if request.resolver_match.url_name == 'cardholders' %}active{% else %}bg-light{% endif %}">Cardholders</a>
         </div>
