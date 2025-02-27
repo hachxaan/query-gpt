@@ -5,7 +5,6 @@ from django.db import models
 class AllowedTable(models.Model):
     class Meta:
         db_table = 'allowed_table'
-        unique_together = ("table", "name")
 
     name = models.CharField(max_length=128, unique=True)
 
