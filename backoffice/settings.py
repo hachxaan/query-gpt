@@ -223,3 +223,37 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 openai_adapter = OpenAIAPIAdapter(os.getenv("OPENAI_API_KEY"))
 
+
+# Logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '[{asctime}] {levelname} {name} | {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+        'file_sms': {
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'sms.log'),
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'query_builder_app.views.sms': {
+            'handlers': ['console', 'file_sms'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    },
+}
+
+# Ensure logs directory exists
+os.makedirs(os.path.join(BASE_DIR, 'logs'), exist_ok=True)
+
