@@ -2,8 +2,11 @@ import os
 import csv
 import io
 import logging
+import time
 import requests
+from requests.adapters import HTTPAdapter
 from requests.auth import HTTPBasicAuth
+from urllib3.util.retry import Retry
 
 logger = logging.getLogger(__name__)
 
@@ -14,6 +17,24 @@ TWILIO_MESSAGING_SERVICE_SID = os.getenv('TWILIO_MESSAGING_SERVICE_SID', '')
 TWILIO_MESSAGES_URL = (
     f"https://api.twilio.com/2010-04-01/Accounts/{TWILIO_ACCOUNT_SID}/Messages.json"
 )
+
+MAX_RETRIES = 3
+RETRY_BACKOFF = 2  # seconds
+COURTESY_DELAY = 1  # seconds between each API call
+
+
+def _get_twilio_session():
+    """Create a requests Session with retry logic for transient errors."""
+    session = requests.Session()
+    retry_strategy = Retry(
+        total=MAX_RETRIES,
+        backoff_factor=RETRY_BACKOFF,
+        status_forcelist=[500, 502, 503, 504],
+    )
+    adapter = HTTPAdapter(max_retries=retry_strategy)
+    session.mount("https://", adapter)
+    session.auth = HTTPBasicAuth(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+    return session
 
 
 def _log_twilio_config():
@@ -54,16 +75,31 @@ def send_single_sms(phone_number: str, message: str) -> dict:
     }
     logger.debug("Twilio request payload: %s", {k: v if k != 'Body' else f'{v[:50]}...' for k, v in payload.items()})
 
-    try:
-        response = requests.post(
-            TWILIO_MESSAGES_URL,
-            data=payload,
-            auth=HTTPBasicAuth(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN),
-            timeout=30,
-        )
-    except requests.RequestException as e:
-        logger.error("Twilio HTTP request failed for %s: %s", phone_number, e)
-        raise
+    last_error = None
+    for attempt in range(1, MAX_RETRIES + 1):
+        try:
+            session = _get_twilio_session()
+            response = session.post(
+                TWILIO_MESSAGES_URL,
+                data=payload,
+                timeout=30,
+            )
+            break  # Success — exit retry loop
+        except (requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+            last_error = e
+            logger.warning("Twilio attempt %d/%d failed for %s: %s",
+                           attempt, MAX_RETRIES, phone_number, e)
+            if attempt < MAX_RETRIES:
+                wait = RETRY_BACKOFF * attempt
+                logger.info("Retrying in %d seconds...", wait)
+                time.sleep(wait)
+            else:
+                logger.error("Twilio GAVE UP after %d attempts for %s: %s",
+                             MAX_RETRIES, phone_number, e)
+                raise
+        except requests.RequestException as e:
+            logger.error("Twilio HTTP request failed for %s: %s", phone_number, e)
+            raise
 
     logger.info("Twilio response -> HTTP %d for %s", response.status_code, phone_number)
 
@@ -131,6 +167,7 @@ def send_bulk_sms_from_csv(csv_file) -> dict:
             errors.append({'phone': phone, 'error': str(e)})
 
         total += 1
+        time.sleep(COURTESY_DELAY)
 
     logger.info("Bulk SMS finished: total=%d success=%d failed=%d", total, success, total - success)
     if errors:
