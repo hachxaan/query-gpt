@@ -71,18 +71,24 @@ def sms_send_bulk(request):
 
     # Read file content now (before the request closes the file)
     file_content = csv_file.read()
+    original_filename = csv_file.name
 
-    def _process_bulk(content):
+    def _process_bulk(content, filename):
         import io
         import django
         import os
         os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backoffice.settings')
         django.setup()
+        from backoffice.settings import BASE_DIR
         from query_builder_app.views.sms.sms_service import send_bulk_sms_from_csv as bulk_send
         import logging as _logging
         _logger = _logging.getLogger(__name__)
+
+        output_dir = os.path.join(str(BASE_DIR), 'logs')
+        os.makedirs(output_dir, exist_ok=True)
+
         try:
-            result = bulk_send(io.BytesIO(content))
+            result = bulk_send(io.BytesIO(content), output_dir=output_dir, input_filename=filename)
             _logger.info(
                 "Bulk SMS completed: total=%d success=%d failed=%d",
                 result['total'], result['success'], result['failed'],
@@ -90,7 +96,7 @@ def sms_send_bulk(request):
         except Exception:
             _logger.exception("Bulk SMS processing failed")
 
-    process = multiprocessing.Process(target=_process_bulk, args=(file_content,))
+    process = multiprocessing.Process(target=_process_bulk, args=(file_content, original_filename))
     process.start()
     logger.info("Bulk SMS spawned process PID=%d", process.pid)
 

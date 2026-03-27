@@ -121,10 +121,11 @@ def send_single_sms(phone_number: str, message: str) -> dict:
     return result
 
 
-def send_bulk_sms_from_csv(csv_file) -> dict:
+def send_bulk_sms_from_csv(csv_file, output_dir=None, input_filename=None) -> dict:
     """
     Read a CSV with columns 'Phone Number' and 'SMS Message',
     send each SMS, and return a summary.
+    Failed numbers are written to <input_filename>_fail.csv.
     """
     content = csv_file.read()
     if isinstance(content, bytes):
@@ -172,6 +173,21 @@ def send_bulk_sms_from_csv(csv_file) -> dict:
     logger.info("Bulk SMS finished: total=%d success=%d failed=%d", total, success, total - success)
     if errors:
         logger.warning("Bulk SMS errors (first 10): %s", errors[:10])
+
+    # Write fail CSV
+    if errors and output_dir and input_filename:
+        base_name = input_filename.rsplit('.', 1)[0] if '.' in input_filename else input_filename
+        fail_filename = f"{base_name}_fail.csv"
+        fail_path = os.path.join(output_dir, fail_filename)
+        try:
+            with open(fail_path, 'w', newline='', encoding='utf-8') as f:
+                writer = csv.DictWriter(f, fieldnames=['Phone Number', 'Error'])
+                writer.writeheader()
+                for err in errors:
+                    writer.writerow({'Phone Number': err.get('phone', ''), 'Error': err.get('error', '')})
+            logger.info("Fail CSV written: %s (%d rows)", fail_path, len(errors))
+        except Exception:
+            logger.exception("Failed to write fail CSV: %s", fail_path)
 
     return {
         'total': total,
