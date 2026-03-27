@@ -114,6 +114,10 @@ def send_single_sms(phone_number: str, message: str) -> dict:
                      phone_number, response.status_code,
                      result.get('code', 'N/A'), result.get('message', 'N/A'))
         logger.debug("Twilio full error response: %s", result)
+        return {
+            'error_code': result.get('code', response.status_code),
+            'message': result.get('message', 'Unknown Twilio error'),
+        }
     else:
         logger.info("Twilio SMS OK to %s -> SID: %s | Status: %s",
                     phone_number, result.get('sid', 'N/A'), result.get('status', 'N/A'))
