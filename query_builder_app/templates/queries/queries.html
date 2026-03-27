@@ -30,17 +30,11 @@
     .queries-grid {
         display: grid;
         gap: 1.5rem;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        grid-template-columns: 1fr;
         padding: 0.5rem;
     }
 
     /* Ajustes responsivos */
-    @media (min-width: 576px) {
-        .queries-grid {
-            grid-template-columns: repeat(1, 1fr);
-        }
-    }
-
     @media (min-width: 768px) {
         .queries-grid {
             grid-template-columns: repeat(2, 1fr);
