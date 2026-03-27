@@ -1,0 +1,447 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}SMS Sender{% endblock %}
+
+{% block extra_css %}
+<style>
+    .sms-container {
+        padding: 2rem;
+        max-width: 100%;
+    }
+
+    .page-title {
+        font-size: 2rem;
+        margin-bottom: 2rem;
+        font-weight: 700;
+        text-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    .sms-tabs {
+        display: flex;
+        gap: 0;
+        margin-bottom: 2rem;
+    }
+
+    .sms-tab {
+        padding: 1rem 2rem;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        cursor: pointer;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+    }
+
+    .sms-tab:first-child {
+        border-radius: 8px 0 0 8px;
+    }
+
+    .sms-tab:last-child {
+        border-radius: 0 8px 8px 0;
+    }
+
+    .sms-tab.active {
+        background: rgba(255, 255, 255, 0.25);
+        font-weight: 600;
+    }
+
+    .sms-tab:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .sms-panel {
+        display: none;
+    }
+
+    .sms-panel.active {
+        display: block;
+    }
+
+    .sms-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        padding: 2rem;
+        max-width: 600px;
+    }
+
+    .sms-card label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: white;
+        font-size: 1rem;
+    }
+
+    .sms-card input[type="tel"],
+    .sms-card textarea {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        font-size: 1rem;
+        margin-bottom: 1.25rem;
+        outline: none;
+        transition: border-color 0.3s;
+    }
+
+    .sms-card input[type="tel"]::placeholder,
+    .sms-card textarea::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+    }
+
+    .sms-card input[type="tel"]:focus,
+    .sms-card textarea:focus {
+        border-color: rgba(255, 255, 255, 0.6);
+    }
+
+    .sms-card textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    .char-count {
+        text-align: right;
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.6);
+        margin-top: -1rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .file-upload-area {
+        border: 2px dashed rgba(255, 255, 255, 0.3);
+        border-radius: 8px;
+        padding: 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-bottom: 1.25rem;
+        position: relative;
+    }
+
+    .file-upload-area:hover {
+        border-color: rgba(255, 255, 255, 0.5);
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .file-upload-area input[type="file"] {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    .file-upload-area i {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        display: block;
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    .file-upload-area .file-name {
+        margin-top: 0.5rem;
+        font-weight: 600;
+    }
+
+    .csv-info {
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.6);
+        margin-bottom: 1.25rem;
+    }
+
+    .csv-info code {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 0.15rem 0.4rem;
+        border-radius: 4px;
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    .btn-send {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        padding: 0.75rem 2rem;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-send:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-send:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .btn-send .spinner {
+        display: none;
+        width: 1rem;
+        height: 1rem;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+    }
+
+    .btn-send.loading .spinner {
+        display: inline-block;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .alert-result {
+        margin-top: 1.25rem;
+        padding: 1rem 1.25rem;
+        border-radius: 8px;
+        display: none;
+        font-size: 0.95rem;
+    }
+
+    .alert-result.success {
+        background: rgba(40, 167, 69, 0.2);
+        border: 1px solid rgba(40, 167, 69, 0.4);
+        color: #a3f0b5;
+        display: block;
+    }
+
+    .alert-result.error {
+        background: rgba(220, 53, 69, 0.2);
+        border: 1px solid rgba(220, 53, 69, 0.4);
+        color: #f5a0a8;
+        display: block;
+    }
+
+    @media (max-width: 768px) {
+        .sms-container {
+            padding: 1rem;
+        }
+        .sms-card {
+            padding: 1.25rem;
+        }
+        .page-title {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex" id="wrapper">
+    {% include 'queries/menu-querys.html' %}
+
+    <div id="page-content-wrapper">
+        <div class="sms-container">
+            <h1 class="page-title">SMS Sender</h1>
+
+            <!-- Tabs -->
+            <div class="sms-tabs">
+                <button class="sms-tab active" data-tab="single" type="button">
+                    <i class="fas fa-comment"></i> Individual
+                </button>
+                <button class="sms-tab" data-tab="bulk" type="button">
+                    <i class="fas fa-comments"></i> Masivo
+                </button>
+            </div>
+
+            <!-- Single SMS Panel -->
+            <div class="sms-panel active" id="panel-single">
+                <div class="sms-card">
+                    <form id="form-single">
+                        <label for="phone">Mobile</label>
+                        <input type="tel" id="phone" name="phone"
+                               placeholder="e.g. 8329488996"
+                               pattern="[0-9+\-\s\(\)]+"
+                               required>
+
+                        <label for="message">Text</label>
+                        <textarea id="message" name="message"
+                                  placeholder="Write your message here..."
+                                  maxlength="1600"
+                                  required></textarea>
+                        <div class="char-count"><span id="char-current">0</span> / 1600</div>
+
+                        <button type="submit" class="btn-send" id="btn-single">
+                            <span class="spinner"></span>
+                            <i class="fas fa-paper-plane"></i>
+                            Enviar Mensaje
+                        </button>
+                    </form>
+                    <div class="alert-result" id="result-single"></div>
+                </div>
+            </div>
+
+            <!-- Bulk SMS Panel -->
+            <div class="sms-panel" id="panel-bulk">
+                <div class="sms-card">
+                    <form id="form-bulk" enctype="multipart/form-data">
+                        <label>Upload CSV</label>
+                        <div class="file-upload-area" id="drop-area">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Click or drag a CSV file here</p>
+                            <p class="file-name" id="file-name"></p>
+                            <input type="file" id="csv_file" name="csv_file" accept=".csv" required>
+                        </div>
+                        <div class="csv-info">
+                            Required columns: <code>Phone Number</code>, <code>SMS Message</code>
+                        </div>
+
+                        <button type="submit" class="btn-send" id="btn-bulk">
+                            <span class="spinner"></span>
+                            <i class="fas fa-paper-plane"></i>
+                            Enviar Mensajes
+                        </button>
+                    </form>
+                    <div class="alert-result" id="result-bulk"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+    // Tabs
+    document.querySelectorAll('.sms-tab').forEach(function(tab) {
+        tab.addEventListener('click', function() {
+            document.querySelectorAll('.sms-tab').forEach(function(t) { t.classList.remove('active'); });
+            document.querySelectorAll('.sms-panel').forEach(function(p) { p.classList.remove('active'); });
+            tab.classList.add('active');
+            document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+        });
+    });
+
+    // Character count
+    var messageEl = document.getElementById('message');
+    var charEl = document.getElementById('char-current');
+    messageEl.addEventListener('input', function() {
+        charEl.textContent = messageEl.value.length;
+    });
+
+    // File name display
+    var fileInput = document.getElementById('csv_file');
+    var fileNameEl = document.getElementById('file-name');
+    fileInput.addEventListener('change', function() {
+        fileNameEl.textContent = fileInput.files.length ? fileInput.files[0].name : '';
+    });
+
+    function showResult(elId, type, msg) {
+        var el = document.getElementById(elId);
+        el.className = 'alert-result ' + type;
+        el.textContent = msg;
+    }
+
+    function setLoading(btn, loading) {
+        if (loading) {
+            btn.classList.add('loading');
+            btn.disabled = true;
+        } else {
+            btn.classList.remove('loading');
+            btn.disabled = false;
+        }
+    }
+
+    function getCsrfToken() {
+        var cookie = document.cookie.split(';').find(function(c) {
+            return c.trim().startsWith('csrftoken=');
+        });
+        return cookie ? cookie.split('=')[1] : '';
+    }
+
+    // Single SMS
+    document.getElementById('form-single').addEventListener('submit', function(e) {
+        e.preventDefault();
+        var btn = document.getElementById('btn-single');
+        var phone = document.getElementById('phone').value.trim();
+        var message = document.getElementById('message').value.trim();
+
+        if (!phone || !message) return;
+
+        setLoading(btn, true);
+        document.getElementById('result-single').className = 'alert-result';
+
+        fetch("{% url 'sms_send_single' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken()
+            },
+            body: JSON.stringify({ phone: phone, message: message })
+        })
+        .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+        .then(function(res) {
+            if (res.ok) {
+                showResult('result-single', 'success', res.data.message);
+                document.getElementById('form-single').reset();
+                charEl.textContent = '0';
+            } else {
+                showResult('result-single', 'error', res.data.error || res.data.message || 'Error');
+            }
+        })
+        .catch(function() {
+            showResult('result-single', 'error', 'Connection error');
+        })
+        .finally(function() {
+            setLoading(btn, false);
+        });
+    });
+
+    // Bulk SMS
+    document.getElementById('form-bulk').addEventListener('submit', function(e) {
+        e.preventDefault();
+        var btn = document.getElementById('btn-bulk');
+        var file = document.getElementById('csv_file').files[0];
+
+        if (!file) return;
+
+        var formData = new FormData();
+        formData.append('csv_file', file);
+
+        setLoading(btn, true);
+        document.getElementById('result-bulk').className = 'alert-result';
+
+        fetch("{% url 'sms_send_bulk' %}", {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCsrfToken()
+            },
+            body: formData
+        })
+        .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+        .then(function(res) {
+            if (res.ok) {
+                showResult('result-bulk', 'success', res.data.message);
+                document.getElementById('form-bulk').reset();
+                fileNameEl.textContent = '';
+            } else {
+                showResult('result-bulk', 'error', res.data.error || 'Error');
+            }
+        })
+        .catch(function() {
+            showResult('result-bulk', 'error', 'Connection error');
+        })
+        .finally(function() {
+            setLoading(btn, false);
+        });
+    });
+})();
+</script>
+{% endblock %}

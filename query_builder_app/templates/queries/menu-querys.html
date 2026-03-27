@@ -65,29 +65,9 @@
         <a href="{% url 'query_list_download' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'query_list_download' %}active{% else %}bg-light{% endif %}">Download Queries</a>
         <a href="{% url 'query_list' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'query_list' %}active{% else %}bg-light{% endif %}">Queries Manager</a>
         <a href="{% url 'audiences' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'audiences' %}active{% else %}bg-light{% endif %}">Audiences</a>
-        <!-- Banking dropdown -->
-        <div class="list-group">
-            <a class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'banking' or request.resolver_match.url_name == 'cardholders' %}active{% else %}bg-light{% endif %}"
-               data-toggle="collapse"
-               href="#bankingSubmenu"
-               role="button"
-               aria-expanded="{% if request.resolver_match.url_name == 'banking' or request.resolver_match.url_name == 'cardholders' %}true{% else %}false{% endif %}"
-               aria-controls="bankingSubmenu">
-                Banking <i class="fas fa-chevron-down float-right"></i>
-            </a>
-            
-            <div class="collapse {% if request.resolver_match.url_name == 'banking' or request.resolver_match.url_name == 'cardholders' %}show{% endif %}" 
-                 id="bankingSubmenu">
-                <a href="{% url 'banking' %}" 
-                   class="list-group-item list-group-item-action pl-4 {% if request.resolver_match.url_name == 'banking' %}active{% else %}bg-light{% endif %}">
-                   Banking Reports
-                </a>
-                <a href="{% url 'cardholders' %}" 
-                   class="list-group-item list-group-item-action pl-4 {% if request.resolver_match.url_name == 'cardholders' %}active{% else %}bg-light{% endif %}">
-                   Migration
-                </a>
-            </div>
-        </div>
+        <a href="{% url 'sms_home' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'sms_home' %}active{% else %}bg-light{% endif %}">
+            <i class="fas fa-sms"></i> SMS
+        </a>
     </div>
 </div>
 <!-- /#sidebar-wrapper -->

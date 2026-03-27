@@ -8,6 +8,7 @@ from query_builder_app.views.banking.update_balance_solid_accounts import Update
 from query_builder_app.views.mailing_audiencias.views import GenerateAndDownloadCSVAudiencesView
 from query_builder_app.views.query_list import  query_list, query_create, query_update, query_delete, get_query_from_gpt
 from query_builder_app.views.query_list_download import query_list_download, download_results
+from query_builder_app.views.sms.views import sms_home, sms_send_single, sms_send_bulk
 from django.views.generic import TemplateView
 
 urlpatterns = [
@@ -31,6 +32,11 @@ urlpatterns = [
     path('generate-csv-cards/', GenerateAndDownloadCSVCardsView.as_view(), name='generate_csv_cards'),
     path('banking/', TemplateView.as_view(template_name='queries/banking-reports.html'), name='banking'),
     path('cardholders/', cardholders_list, name='cardholders'),
+
+    # SMS
+    path('sms/', sms_home, name='sms_home'),
+    path('sms/send/', sms_send_single, name='sms_send_single'),
+    path('sms/send-bulk/', sms_send_bulk, name='sms_send_bulk'),
 ]
 
 
