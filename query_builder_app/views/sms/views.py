@@ -1,6 +1,6 @@
 import json
 import logging
-import threading
+import multiprocessing
 
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -74,17 +74,25 @@ def sms_send_bulk(request):
 
     def _process_bulk(content):
         import io
+        import django
+        import os
+        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backoffice.settings')
+        django.setup()
+        from query_builder_app.views.sms.sms_service import send_bulk_sms_from_csv as bulk_send
+        import logging as _logging
+        _logger = _logging.getLogger(__name__)
         try:
-            result = send_bulk_sms_from_csv(io.BytesIO(content))
-            logger.info(
+            result = bulk_send(io.BytesIO(content))
+            _logger.info(
                 "Bulk SMS completed: total=%d success=%d failed=%d",
                 result['total'], result['success'], result['failed'],
             )
         except Exception:
-            logger.exception("Bulk SMS processing failed")
+            _logger.exception("Bulk SMS processing failed")
 
-    thread = threading.Thread(target=_process_bulk, args=(file_content,), daemon=True)
-    thread.start()
+    process = multiprocessing.Process(target=_process_bulk, args=(file_content,))
+    process.start()
+    logger.info("Bulk SMS spawned process PID=%d", process.pid)
 
     return JsonResponse({
         'status': 'success',
