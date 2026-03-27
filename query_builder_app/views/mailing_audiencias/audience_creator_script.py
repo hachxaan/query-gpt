@@ -59,7 +59,7 @@ SELECT
 "Card Number", 
 "Company Name",
 "file_name"
-FROM vw_mailings_v2
+FROM vw_mailings_v5
 ORDER BY "file_name"
 """
 
