@@ -161,3 +161,6 @@ backoffice.zip
 *.csv
 uploads/
 dev/
+
+docs/meets/***
+.github

@@ -12,8 +12,13 @@
     <div class="container-fluid">
       <h1 class="mt-4">Audiences</h1>
       <p>
-        <a href="{% url 'generate_csv_audiences' %}" class="btn btn-primary" role="button">
-          Download Audiences
+        <a href="{% url 'generate_csv_audiences' %}" class="btn btn-primary" role="button"
+           onclick="return confirm('This may take a while. Continue?')">
+          Audiences by Company
+        </a>
+        <a href="{% url 'generate_csv_audiences_wl' %}" class="btn btn-success ml-2" role="button"
+           onclick="return confirm('This may take a while. Continue?')">
+          Audiences by White Label and Services
         </a>
       </p>
 
