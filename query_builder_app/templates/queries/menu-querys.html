@@ -1,54 +1,69 @@
 <!-- Sidebar -->
-<div class="bg-light border-right" id="sidebar-wrapper">
+<div class="border-right" id="sidebar-wrapper">
     <style>
         #sidebar-wrapper {
-            background: rgba(255, 255, 255, 0.1) !important;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-right: 1px solid rgba(255, 255, 255, 0.2);
+            background: var(--navbar, hsl(20, 10%, 98%)) !important;
+            border-right: 1px solid var(--border, hsl(0, 0%, 82%)) !important;
             min-height: 100vh;
             position: sticky;
             top: 0;
             height: 100vh;
-            width: 300px !important; /* Aumentado de ~150px a 300px */
+            width: 260px !important;
             overflow-y: auto;
         }
 
-        .sidebar-heading {
-            color: white;
-            font-size: 1.2rem;
-            padding: 1.5rem 1rem;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        #sidebar-wrapper .sidebar-heading {
+            color: var(--secondary, hsl(210, 54%, 25%));
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding: 1.25rem 1rem 0.5rem;
         }
 
-        .list-group-item-action {
-            background: rgba(255, 255, 255, 0.1) !important;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            margin-bottom: 0.5rem;
-            color: white !important;
-            transition: all 0.3s ease;
-            padding: 1rem 1.5rem;
-            font-size: 1.1rem;
+        #sidebar-wrapper .sidebar-heading.sidebar-title {
+            font-size: 1rem;
+            letter-spacing: normal;
+            text-transform: none;
+            padding: 1.25rem 1rem;
+            font-weight: 700;
+            color: var(--fg, hsl(0, 0%, 7.5%));
         }
 
-        .list-group-item-action:hover {
-            background: rgba(255, 255, 255, 0.2) !important;
-            color: white !important;
+        #sidebar-wrapper .list-group-item-action {
+            background: transparent !important;
+            border: none !important;
+            border-left: 3px solid transparent !important;
+            color: var(--muted-fg, hsl(0, 0%, 45%)) !important;
+            transition: all 0.15s ease;
+            padding: 0.65rem 1.25rem;
+            font-size: 0.875rem;
+            font-weight: 400;
         }
 
-        .list-group-item-action.active {
-            background: rgba(255, 255, 255, 0.25) !important;
-            border-color: rgba(255, 255, 255, 0.4);
-            color: white !important;
-            font-weight: 600;
+        #sidebar-wrapper .list-group-item-action:hover {
+            background: var(--muted, hsl(0, 0%, 93%)) !important;
+            color: var(--fg, hsl(0, 0%, 7.5%)) !important;
+            border-left-color: var(--primary, hsl(201, 100%, 46%)) !important;
         }
 
-        /* Ajustes responsivos */
+        #sidebar-wrapper .list-group-item-action.active {
+            background: hsla(201, 100%, 46%, 0.08) !important;
+            border-left-color: var(--primary, hsl(201, 100%, 46%)) !important;
+            color: var(--primary, hsl(201, 100%, 46%)) !important;
+            font-weight: 500;
+        }
+
+        #sidebar-wrapper .sidebar-divider {
+            border-top: 1px solid var(--border, hsl(0, 0%, 82%));
+            margin: 0.5rem 1rem;
+        }
+
         @media (max-width: 768px) {
             #sidebar-wrapper {
                 position: fixed;
                 z-index: 1000;
-                width: 300px !important;
+                width: 260px !important;
                 transform: translateX(-100%);
                 transition: transform 0.3s ease-in-out;
             }
@@ -58,23 +73,20 @@
             }
         }
     </style>
-    <div class="sidebar-heading">Menú</div>
+    <div class="sidebar-heading sidebar-title">Menú</div>
     <div class="list-group list-group-flush">
-        <!-- Usar la variable current_path para aplicar la clase active -->
-        <a href="{% url 'home' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'home' %}active{% else %}bg-light{% endif %}">Home</a>
-        <a href="{% url 'query_list_download' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'query_list_download' %}active{% else %}bg-light{% endif %}">Download Queries</a>
-        <a href="{% url 'query_list' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'query_list' %}active{% else %}bg-light{% endif %}">Queries Manager</a>
-        <a href="{% url 'audiences' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'audiences' %}active{% else %}bg-light{% endif %}">Audiences</a>
-        <a href="{% url 'sms_home' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'sms_home' %}active{% else %}bg-light{% endif %}">
+        <a href="{% url 'home' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a>
+        <a href="{% url 'query_list_download' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'query_list_download' %}active{% endif %}">Download Queries</a>
+        <a href="{% url 'query_list' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'query_list' %}active{% endif %}">Queries Manager</a>
+        <a href="{% url 'audiences' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'audiences' %}active{% endif %}">Audiences</a>
+        <a href="{% url 'sms_home' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'sms_home' %}active{% endif %}">
             <i class="fas fa-sms"></i> SMS
         </a>
-        <!-- Divider -->
         <hr class="sidebar-divider">
-        <!-- Heading -->
-        <div class="sidebar-heading" style="color: rgba(255,255,255,0.4); padding: 0.75rem 1rem; font-size: 0.65rem; text-transform: uppercase;">
+        <div class="sidebar-heading">
             Catalogs
         </div>
-        <a href="{% url 'exclusion_list' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'exclusion_list' %}active{% else %}bg-light{% endif %}">
+        <a href="{% url 'exclusion_list' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'exclusion_list' %}active{% endif %}">
             <i class="fas fa-ban"></i> Mailing Exclusion
         </a>
     </div>

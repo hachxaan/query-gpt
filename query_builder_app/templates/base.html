@@ -12,127 +12,291 @@
     <title>{% block title %}Query Builder{% endblock %}</title>
 
     <link href="{% static 'vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
-    <link
-        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
         rel="stylesheet">
 
     <link href="{% static 'css/sb-admin-2.min.css' %}" rel="stylesheet">
 
     <style>
+        /* ── Design tokens (ew-history) ── */
+        :root {
+            --bg:         hsl(0, 0%, 100%);
+            --fg:         hsl(0, 0%, 7.5%);
+            --card-bg:    hsl(0, 0%, 100%);
+            --primary:    hsl(201, 100%, 46%);
+            --primary-fg: hsl(0, 0%, 100%);
+            --secondary:  hsl(210, 54%, 25%);
+            --secondary-fg: hsl(0, 0%, 100%);
+            --muted:      hsl(0, 0%, 93%);
+            --muted-fg:   hsl(0, 0%, 45%);
+            --accent:     hsl(201, 98%, 79%);
+            --border:     hsl(0, 0%, 82%);
+            --navbar:     hsl(20, 10%, 98%);
+            --destructive: hsl(0, 100%, 41%);
+            --success:    hsl(123, 82%, 29%);
+            --warning:    hsl(35, 98%, 69%);
+            --radius:     0.5rem;
+        }
+
+        /* ── Base ── */
         body {
-            background: linear-gradient(45deg, #1a2980, #26d0ce) !important;
-            background-attachment: fixed !important;
-            color: white; /* Color de texto base blanco */
+            background: var(--bg) !important;
+            color: var(--fg) !important;
+            font-family: 'Work Sans', 'Helvetica Neue', Arial, sans-serif !important;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
-        .glassmorphic {
-            background: rgba(255, 255, 255, 0.1) !important;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        .font-mono, code, pre, .badge-mono {
+            font-family: 'JetBrains Mono', 'Courier New', monospace !important;
         }
 
+        /* ── Navbar ── */
+        .topbar {
+            background: var(--navbar) !important;
+            border-bottom: 1px solid var(--border) !important;
+            box-shadow: none !important;
+        }
+
+        .topbar .nav-link i,
+        .topbar .nav-link {
+            color: var(--fg) !important;
+        }
+
+        .topbar .nav-link:hover {
+            color: var(--primary) !important;
+        }
+
+        .topbar-divider {
+            border-right-color: var(--border) !important;
+        }
+
+        /* ── Cards ── */
+        .card {
+            background: var(--card-bg) !important;
+            border: 1px solid var(--border) !important;
+            border-radius: var(--radius) !important;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important;
+            color: var(--fg) !important;
+        }
+
+        .card-header {
+            background: var(--muted) !important;
+            border-bottom: 1px solid var(--border) !important;
+            color: var(--fg) !important;
+        }
+
+        .card-body {
+            background: var(--card-bg) !important;
+            color: var(--fg) !important;
+        }
+
+        .card-header h6,
+        .card-header .font-weight-bold {
+            color: var(--secondary) !important;
+        }
+
+        /* ── Tables ── */
+        .table {
+            color: var(--fg) !important;
+        }
+
+        .table thead th {
+            background: var(--secondary) !important;
+            color: var(--secondary-fg) !important;
+            font-size: 0.75rem !important;
+            font-weight: 700 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.1em !important;
+            border-bottom: 2px solid var(--secondary) !important;
+        }
+
+        .table td, .table th {
+            border-top-color: var(--border) !important;
+        }
+
+        .table-hover tbody tr:hover {
+            background: var(--muted) !important;
+        }
+
+        .table-striped tbody tr:nth-of-type(odd) {
+            background: hsla(0, 0%, 93%, 0.3) !important;
+        }
+
+        /* ── Buttons ── */
+        .btn-primary {
+            background-color: var(--primary) !important;
+            border-color: var(--primary) !important;
+            color: var(--primary-fg) !important;
+        }
+
+        .btn-primary:hover {
+            background-color: hsl(201, 100%, 38%) !important;
+            border-color: hsl(201, 100%, 38%) !important;
+        }
+
+        .btn-success {
+            background-color: var(--success) !important;
+            border-color: var(--success) !important;
+        }
+
+        .btn-danger {
+            background-color: var(--destructive) !important;
+            border-color: var(--destructive) !important;
+        }
+
+        .btn-outline-primary {
+            color: var(--primary) !important;
+            border-color: var(--primary) !important;
+        }
+
+        .btn-outline-primary:hover {
+            background-color: var(--primary) !important;
+            color: var(--primary-fg) !important;
+        }
+
+        .btn-outline-danger {
+            color: var(--destructive) !important;
+            border-color: var(--destructive) !important;
+        }
+
+        .btn-outline-danger:hover {
+            background-color: var(--destructive) !important;
+            color: #fff !important;
+        }
+
+        /* ── Forms ── */
+        .form-control {
+            background: var(--card-bg) !important;
+            border: 1px solid var(--border) !important;
+            color: var(--fg) !important;
+            border-radius: var(--radius) !important;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary) !important;
+            box-shadow: 0 0 0 0.2rem hsla(201, 100%, 46%, 0.25) !important;
+        }
+
+        .form-control::placeholder {
+            color: var(--muted-fg) !important;
+        }
+
+        /* ── Badges ── */
+        .badge-secondary {
+            background-color: var(--secondary) !important;
+        }
+
+        .badge-primary {
+            background-color: var(--primary) !important;
+        }
+
+        /* ── Dropdowns ── */
+        .dropdown-menu {
+            background: var(--card-bg) !important;
+            border: 1px solid var(--border) !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+        }
+
+        .dropdown-item {
+            color: var(--fg) !important;
+        }
+
+        .dropdown-item:hover {
+            background: var(--muted) !important;
+            color: var(--fg) !important;
+        }
+
+        /* ── Modals ── */
+        .modal-content {
+            background: var(--card-bg) !important;
+            border: 1px solid var(--border) !important;
+            color: var(--fg) !important;
+        }
+
+        .modal-header {
+            border-bottom-color: var(--border) !important;
+        }
+
+        .modal-footer {
+            border-top-color: var(--border) !important;
+        }
+
+        /* ── Pagination ── */
+        .page-item .page-link {
+            color: var(--primary) !important;
+            background: var(--card-bg) !important;
+            border-color: var(--border) !important;
+        }
+
+        .page-item.active .page-link {
+            background: var(--primary) !important;
+            border-color: var(--primary) !important;
+            color: var(--primary-fg) !important;
+        }
+
+        /* ── Alerts ── */
+        .alert-success {
+            background: hsla(123, 82%, 29%, 0.1) !important;
+            border-color: var(--success) !important;
+            color: hsl(123, 82%, 22%) !important;
+        }
+
+        .alert-danger {
+            background: hsla(0, 100%, 41%, 0.1) !important;
+            border-color: var(--destructive) !important;
+            color: hsl(0, 100%, 30%) !important;
+        }
+
+        .alert-warning {
+            background: hsla(35, 98%, 69%, 0.15) !important;
+            border-color: var(--warning) !important;
+            color: hsl(35, 60%, 30%) !important;
+        }
+
+        /* ── SB Admin 2 overrides ── */
         .bg-gradient-primary {
-            background: rgba(255, 255, 255, 0.15) !important;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-right: 1px solid rgba(255, 255, 255, 0.2);
+            background: var(--secondary) !important;
         }
 
         .sidebar .nav-item .nav-link {
-            color: rgba(255, 255, 255, 0.8) !important;
-        }
-
-        .sidebar .nav-item .nav-link:hover {
-            color: white !important;
-            background: rgba(255, 255, 255, 0.1);
+            color: var(--secondary-fg) !important;
         }
 
         .sidebar-brand-text {
-            color: white !important;
+            color: var(--secondary-fg) !important;
         }
 
-        .background-shapes {
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            overflow: hidden;
-            pointer-events: none;
-        }
-
-        .shape {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(5px);
-            animation: float 8s infinite;
-        }
-
-        .shape:nth-child(1) {
-            width: 300px;
-            height: 300px;
-            top: -150px;
-            right: -150px;
-        }
-
-        .shape:nth-child(2) {
-            width: 200px;
-            height: 200px;
-            bottom: -100px;
-            left: -100px;
-        }
-
-        @keyframes float {
-            0% {
-                transform: translateY(0px) rotate(0deg);
-            }
-
-            50% {
-                transform: translateY(-20px) rotate(180deg);
-            }
-
-            100% {
-                transform: translateY(0px) rotate(360deg);
-            }
+        .text-primary {
+            color: var(--primary) !important;
         }
 
         .container-fluid {
             background: transparent !important;
         }
 
-        .card,
-        .card-header,
-        .card-body {
-            background: rgba(255, 255, 255, 0.1) !important;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+        /* ── Utility: page title ── */
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--fg);
+            margin-bottom: 1.5rem;
         }
 
-        .card {
-            color: white;
+        /* ── Typography overrides ── */
+        h1, h2, h3, h4, h5, h6 {
+            color: var(--fg);
         }
 
-        .card-header {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        a {
+            color: var(--primary);
         }
 
-        .table {
-            color: white;
+        a:hover {
+            color: hsl(201, 100%, 38%);
         }
 
-        .table thead th {
-            border-bottom-color: rgba(255, 255, 255, 0.2);
-        }
-
-        .table td,
-        .table th {
-            border-top-color: rgba(255, 255, 255, 0.2);
-        }
-
-        /* Agregar estilos base para el grid responsivo */
+        /* ── Responsive ── */
         @media (max-width: 576px) {
             .container-fluid {
                 padding: 1rem;
@@ -150,22 +314,18 @@
 </head>
 
 <body id="page-top">
-    <div class="background-shapes">
-        <div class="shape"></div>
-        <div class="shape"></div>
-    </div>
 
     <!-- Topbar -->
-    <nav class="navbar navbar-expand navbar-light topbar mb-4 static-top glassmorphic">
+    <nav class="navbar navbar-expand navbar-light topbar mb-4 static-top">
         <a class="nav-link" href="{% url 'home' %}" title="Home">
-            <i class="fas fa-home fa-fw" style="color: white;"></i>
+            <i class="fas fa-home fa-fw"></i>
         </a>
 
         <ul class="navbar-nav ml-auto">
             {% if user.is_superuser %}
             <li class="nav-item ml-3">
                 <a class="nav-link" href="{% url 'admin:index' %}" title="Admin Panel">
-                    <i class="fas fa-wrench fa-fw" style="color: white;"></i>
+                    <i class="fas fa-wrench fa-fw"></i>
                 </a>
             </li>
             {% endif %}
@@ -174,7 +334,7 @@
             <li class="nav-item dropdown no-arrow">
                 <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                     data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <span class="mr-2 d-none d-lg-inline" style="color: rgba(255,255,255,0.9);">{{ user.first_name }} {{ user.last_name }}</span>
+                    <span class="mr-2 d-none d-lg-inline text-muted">{{ user.first_name }} {{ user.last_name }}</span>
                     <img class="img-profile rounded-circle"
                         src="{% static 'img/undraw_profile.svg' %}">
                 </a>

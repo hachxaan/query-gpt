@@ -11,10 +11,10 @@
     }
 
     .page-title {
-        font-size: 2rem;
-        margin-bottom: 2rem;
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
         font-weight: 700;
-        text-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        color: var(--fg);
     }
 
     .sms-tabs {
@@ -24,30 +24,34 @@
     }
 
     .sms-tab {
-        padding: 1rem 2rem;
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        color: white;
+        padding: 0.75rem 1.5rem;
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        color: var(--muted-fg);
         cursor: pointer;
-        font-size: 1.1rem;
-        transition: all 0.3s ease;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: all 0.15s ease;
     }
 
     .sms-tab:first-child {
-        border-radius: 8px 0 0 8px;
+        border-radius: var(--radius) 0 0 var(--radius);
     }
 
     .sms-tab:last-child {
-        border-radius: 0 8px 8px 0;
+        border-radius: 0 var(--radius) 0 var(--radius);
     }
 
     .sms-tab.active {
-        background: rgba(255, 255, 255, 0.25);
+        background: var(--primary);
+        border-color: var(--primary);
+        color: var(--primary-fg);
         font-weight: 600;
     }
 
-    .sms-tab:hover {
-        background: rgba(255, 255, 255, 0.2);
+    .sms-tab:hover:not(.active) {
+        background: var(--muted);
+        color: var(--fg);
     }
 
     .sms-panel {
@@ -59,45 +63,46 @@
     }
 
     .sms-card {
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 12px;
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
         padding: 2rem;
         max-width: 600px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
     }
 
     .sms-card label {
         display: block;
         margin-bottom: 0.5rem;
-        font-weight: 600;
-        color: white;
-        font-size: 1rem;
+        font-weight: 500;
+        color: var(--fg);
+        font-size: 0.875rem;
     }
 
     .sms-card input[type="tel"],
     .sms-card textarea {
         width: 100%;
-        padding: 0.75rem 1rem;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        border-radius: 8px;
-        background: rgba(255, 255, 255, 0.1);
-        color: white;
-        font-size: 1rem;
+        padding: 0.625rem 0.875rem;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--card-bg);
+        color: var(--fg);
+        font-size: 0.875rem;
+        font-family: 'Work Sans', sans-serif;
         margin-bottom: 1.25rem;
         outline: none;
-        transition: border-color 0.3s;
+        transition: border-color 0.15s;
     }
 
     .sms-card input[type="tel"]::placeholder,
     .sms-card textarea::placeholder {
-        color: rgba(255, 255, 255, 0.5);
+        color: var(--muted-fg);
     }
 
     .sms-card input[type="tel"]:focus,
     .sms-card textarea:focus {
-        border-color: rgba(255, 255, 255, 0.6);
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.2rem hsla(201, 100%, 46%, 0.25);
     }
 
     .sms-card textarea {
@@ -107,26 +112,28 @@
 
     .char-count {
         text-align: right;
-        font-size: 0.85rem;
-        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.75rem;
+        color: var(--muted-fg);
         margin-top: -1rem;
         margin-bottom: 1.25rem;
+        font-family: 'JetBrains Mono', monospace;
     }
 
     .file-upload-area {
-        border: 2px dashed rgba(255, 255, 255, 0.3);
-        border-radius: 8px;
+        border: 2px dashed var(--border);
+        border-radius: var(--radius);
         padding: 2rem;
         text-align: center;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: all 0.15s ease;
         margin-bottom: 1.25rem;
         position: relative;
+        color: var(--muted-fg);
     }
 
     .file-upload-area:hover {
-        border-color: rgba(255, 255, 255, 0.5);
-        background: rgba(255, 255, 255, 0.05);
+        border-color: var(--primary);
+        background: hsla(201, 100%, 46%, 0.04);
     }
 
     .file-upload-area input[type="file"] {
@@ -143,44 +150,48 @@
         font-size: 2rem;
         margin-bottom: 0.5rem;
         display: block;
-        color: rgba(255, 255, 255, 0.7);
+        color: var(--muted-fg);
     }
 
     .file-upload-area .file-name {
         margin-top: 0.5rem;
         font-weight: 600;
+        color: var(--fg);
     }
 
     .csv-info {
-        font-size: 0.85rem;
-        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.8rem;
+        color: var(--muted-fg);
         margin-bottom: 1.25rem;
     }
 
     .csv-info code {
-        background: rgba(255, 255, 255, 0.1);
+        background: var(--muted);
         padding: 0.15rem 0.4rem;
         border-radius: 4px;
-        color: rgba(255, 255, 255, 0.9);
+        color: var(--fg);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.75rem;
     }
 
     .btn-send {
-        background: rgba(255, 255, 255, 0.2);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        color: white;
-        padding: 0.75rem 2rem;
-        border-radius: 8px;
-        font-size: 1.1rem;
+        background: var(--primary);
+        border: 1px solid var(--primary);
+        color: var(--primary-fg);
+        padding: 0.625rem 1.5rem;
+        border-radius: var(--radius);
+        font-size: 0.875rem;
         font-weight: 600;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: all 0.15s ease;
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
     }
 
     .btn-send:hover {
-        background: rgba(255, 255, 255, 0.3);
+        background: hsl(201, 100%, 38%);
+        border-color: hsl(201, 100%, 38%);
     }
 
     .btn-send:disabled {
@@ -192,7 +203,7 @@
         display: none;
         width: 1rem;
         height: 1rem;
-        border: 2px solid rgba(255, 255, 255, 0.3);
+        border: 2px solid hsla(0, 0%, 100%, 0.3);
         border-top-color: white;
         border-radius: 50%;
         animation: spin 0.6s linear infinite;
@@ -215,16 +226,16 @@
     }
 
     .alert-result.success {
-        background: rgba(40, 167, 69, 0.2);
-        border: 1px solid rgba(40, 167, 69, 0.4);
-        color: #a3f0b5;
+        background: hsla(123, 82%, 29%, 0.1);
+        border: 1px solid var(--success);
+        color: hsl(123, 82%, 22%);
         display: block;
     }
 
     .alert-result.error {
-        background: rgba(220, 53, 69, 0.2);
-        border: 1px solid rgba(220, 53, 69, 0.4);
-        color: #f5a0a8;
+        background: hsla(0, 100%, 41%, 0.1);
+        border: 1px solid var(--destructive);
+        color: hsl(0, 100%, 30%);
         display: block;
     }
 

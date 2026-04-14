@@ -4,12 +4,6 @@
 {% block content %}
 
 <style>
-    body {
-        background: linear-gradient(45deg, #1a2980, #26d0ce);
-        background-attachment: fixed;
-        color: white;
-    }
-
     #wrapper {
         background: transparent;
     }
@@ -21,10 +15,10 @@
     }
 
     .page-title {
-        font-size: 2rem;
-        margin-bottom: 2rem;
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
         font-weight: 700;
-        text-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        color: var(--fg);
     }
 
     .queries-grid {
@@ -34,7 +28,6 @@
         padding: 0.5rem;
     }
 
-    /* Ajustes responsivos */
     @media (min-width: 768px) {
         .queries-grid {
             grid-template-columns: repeat(2, 1fr);
@@ -53,43 +46,38 @@
         }
     }
 
-    /* Ajustes para las tarjetas */
     .query-card {
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-        border-radius: 12px;
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+        border-radius: var(--radius);
         overflow: hidden;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
         width: 100%;
         min-width: 250px;
         margin: 0 auto;
     }
 
     .query-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 15px 25px rgba(0, 0, 0, 0.25);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
     .query-card-header {
         padding: 1.5rem;
-        position: relative;
-        overflow: hidden;
     }
 
     .query-title {
-        font-size: 1.25rem;
-        font-weight: 600;
-        margin-bottom: 0.75rem;
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--fg);
+        margin-bottom: 0.5rem;
     }
 
     .query-description {
-        font-size: 1rem;
+        font-size: 0.875rem;
         line-height: 1.5;
-        color: rgba(255, 255, 255, 0.8);
+        color: var(--muted-fg);
         display: -webkit-box;
         -webkit-line-clamp: 3;
         -webkit-box-orient: vertical;
@@ -97,76 +85,70 @@
     }
 
     .query-card-footer {
-        padding: 1.25rem;
-        background: rgba(0, 0, 0, 0.1);
+        padding: 1rem 1.5rem;
+        background: var(--muted);
         display: flex;
         justify-content: flex-end;
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        border-top: 1px solid var(--border);
     }
 
     .download-button {
-        background: rgba(255, 255, 255, 0.2);
+        background: var(--primary);
         border: none;
-        color: white;
-        border-radius: 6px;
-        padding: 0.75rem 1.5rem;
-        font-size: 1rem;
+        color: var(--primary-fg);
+        border-radius: var(--radius);
+        padding: 0.5rem 1.25rem;
+        font-size: 0.875rem;
+        font-weight: 500;
         display: flex;
         align-items: center;
-        gap: 0.75rem;
+        gap: 0.5rem;
         text-decoration: none;
-        transition: background-color 0.3s ease;
+        transition: background-color 0.2s ease;
     }
 
     .download-button:hover {
-        background: rgba(255, 255, 255, 0.3);
+        background: hsl(201, 100%, 38%);
+        color: var(--primary-fg);
+        text-decoration: none;
     }
 
     .download-icon {
-        font-size: 1rem;
+        font-size: 0.875rem;
     }
 
-    /* Ajustes responsivos para el contenedor */
     @media (max-width: 768px) {
         .container-fluid {
             padding: 1rem;
         }
-
         .page-title {
-            font-size: 1.5rem;
+            font-size: 1.25rem;
             margin-bottom: 1rem;
         }
-
         .query-card-header {
             padding: 1.25rem;
         }
-
         .query-title {
-            font-size: 1.1rem;
+            font-size: 0.95rem;
         }
-
         .query-description {
-            font-size: 0.9rem;
+            font-size: 0.8rem;
         }
     }
 
-    /* Ajustes para dispositivos muy pequeños */
     @media (max-width: 576px) {
         .queries-grid {
             gap: 1rem;
         }
-
         .query-card-header {
             padding: 1rem;
         }
-
         .query-card-footer {
-            padding: 1rem;
+            padding: 0.75rem 1rem;
         }
-
         .download-button {
             padding: 0.5rem 1rem;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
         }
     }
 </style>
