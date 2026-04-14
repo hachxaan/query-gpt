@@ -75,9 +75,7 @@
     </style>
     <div class="sidebar-heading sidebar-title">Menú</div>
     <div class="list-group list-group-flush">
-        <a href="{% url 'home' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a>
-        <a href="{% url 'query_list_download' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'query_list_download' %}active{% endif %}">Download Queries</a>
-        <a href="{% url 'query_list' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'query_list' %}active{% endif %}">Queries Manager</a>
+        <a href="{% url 'query_list_download' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'query_list_download' %}active{% endif %}">Queries</a>
         <a href="{% url 'audiences' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'audiences' %}active{% endif %}">Audiences</a>
         <a href="{% url 'sms_home' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'sms_home' %}active{% endif %}">
             <i class="fas fa-sms"></i> SMS
