@@ -16,8 +16,6 @@ def generate_csv_files_by_wl_and_services():
     "Tags", 
     "Card Number", 
     "Company Name",
-    "code_service",
-    "tag_mailing",
     "file_name"
     FROM vw_mailings_by_white_label_and_services
     ORDER BY "file_name"
