@@ -38,7 +38,8 @@ companies_filter AS (
            -- disabled=true → COALESCE(true,false)=true → NOT true = false (sin banking)
            -- disabled=false → COALESCE(false,false)=false → NOT false = true (tiene banking)
            NOT COALESCE(bs.disabled, false) AS has_banking,
-           COALESCE(c1.payroll_card, false) AS payroll_card
+           COALESCE(c1.payroll_card, false) AS payroll_card,
+           c1.mailing_group
     FROM companies c1
     LEFT JOIN banking_status bs ON bs.company_id = c1.id
     WHERE NOT (c1.id IN (SELECT company_id FROM excluded_companies))
@@ -150,16 +151,23 @@ tag_mailing_logic AS (
 ),
 file_name_logic AS (
     SELECT u.id AS user_id,
-           concat(
-               to_char(CURRENT_DATE::timestamp with time zone, 'YYYYMMDD'),
-               '_',
-               c.white_label_tag,
-               '_',
-               cs.code_service,
-               '_',
-               COALESCE(u."Tags", 'NoTag'),
-               '_records.csv'
-           ) AS file_name
+           CASE
+               WHEN c.mailing_group = 'Do Not Send' THEN
+                   concat(to_char(CURRENT_DATE::timestamp with time zone, 'YYYYMMDD'), '_DoNotSend_records.csv')
+               WHEN c.mailing_group = 'CAUTION' THEN
+                   concat(to_char(CURRENT_DATE::timestamp with time zone, 'YYYYMMDD'), '_CAUTION_records.csv')
+               ELSE
+                   concat(
+                       to_char(CURRENT_DATE::timestamp with time zone, 'YYYYMMDD'),
+                       '_',
+                       c.white_label_tag,
+                       '_',
+                       cs.code_service,
+                       '_',
+                       COALESCE(u."Tags", 'NoTag'),
+                       '_records.csv'
+                   )
+           END AS file_name
     FROM users_filter u
     JOIN companies_filter c ON c.id = u.company_id
     JOIN code_service_logic cs ON cs.company_id = c.id
@@ -170,7 +178,7 @@ SELECT u._email AS "Email Address",
        u.id AS "User ID",
        wl.white_label_description AS "White Label",
        wl.customer_service AS "Label Customer Service",
-       u."Tags",
+       tm.tag_mailing AS "Tags",
        u."Tags_2",
        cl4.last_4 AS "Card Number",
        c.company_name AS "Company Name",
@@ -181,9 +189,7 @@ SELECT u._email AS "Email Address",
        c.payroll_active,
        c.has_banking,
        c.id AS company_id,
-       c.payroll_card,
-       cs.code_service,
-       tm.tag_mailing
+       c.payroll_card
 FROM users_filter u
 JOIN companies_filter c ON c.id = u.company_id
 JOIN code_service_logic cs ON cs.company_id = c.id

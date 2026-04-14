@@ -12,6 +12,7 @@ Mailchimp usa estos tags para segmentar campañas. El PO puede filtrar audiencia
 - **Vista SQL**: `public.vw_mailings_by_white_label_and_services`
 - **Archivo SQL**: `docs/sql/vw_mailings_by_white_label_and_services.sql`
 - **CTE responsable**: `tag_mailing_logic` (usa `CROSS JOIN LATERAL` + `string_agg`)
+- **Helper Python**: `query_builder_app/helpers/audiences.py` (post-processing cardholder payroll override)
 
 ## Cómo agregar un nuevo tag
 
@@ -21,6 +22,7 @@ Mailchimp usa estos tags para segmentar campañas. El PO puede filtrar audiencia
    ```sql
    (CASE WHEN <condición> THEN '<NombreTag>' END),
    ```
+3.5. Si el tag depende de datos en otra BD (como `cardholder`), implementar la lógica en `helpers/audiences.py` como post-procesamiento
 4. Si el tag es incondicional (siempre aplica), usar:
    ```sql
    ('<NombreTag>'),
@@ -40,6 +42,8 @@ Mailchimp usa estos tags para segmentar campañas. El PO puede filtrar audiencia
 - Tags NULL se filtran automáticamente (`WHERE tag IS NOT NULL`)
 - Los tags NO cambian el agrupamiento de archivos (eso lo hace `code_service_logic`)
 - Los tags son **independientes** del `code_service` del nombre del archivo — un usuario en un archivo `MKTP` puede tener tags como `Remittances, HealthInsurance`
+- Usuarios con `companies.mailing_group = 'Do Not Send'` se agrupan en un solo archivo: `YYYYMMDD_DoNotSend_records.csv`
+- Usuarios con `companies.mailing_group = 'CAUTION'` se agrupan en un solo archivo: `YYYYMMDD_CAUTION_records.csv`
 
 ## Dependencias de datos
 
@@ -63,3 +67,23 @@ Determinada por `companies_sections` con `section_id = 9`:
 - **`disabled = true`** → NO tiene banking
 
 SQL: `NOT COALESCE(bs.disabled, false) AS has_banking`
+
+## Regla de Payroll/Prepaid (cardholder override)
+La clasificación Prepaid/Payroll tiene dos fuentes, con prioridad:
+
+1. **Si el usuario tiene registro en `cardholder`** (tabla en BD `banking_operation`):
+   - `cardholder.program_id` contiene 'PAYROLL' (case-insensitive) → **Payroll**
+   - `cardholder.program_id` NO contiene 'PAYROLL' → **Prepaid**
+2. **Si NO tiene cardholder** → se usa `companies.payroll_card` (true=Payroll, false=Prepaid)
+
+Este override se aplica en Python (`helpers/audiences.py`), no en la vista SQL, porque `cardholder` está en una BD distinta (`banking_operation`).
+
+Tags afectados por el override: `ALLPrepaid`↔`ALLPayroll`, `NWAPrepaid`↔`NWAPayroll`, `PrepaidCard`↔`PayrollCard`, `ActivePrepaidCardholder`↔`ActivePayrollCardholder`.
+
+Conexión banking_operation vía env vars:
+- `NAME_BANKING_OPERATION_READ_ONLY`
+- `USER_BANKING_OPERATION_READ_ONLY`
+- `PASSWORD_BANKING_OPERATION_READ_ONLY`
+- `HOST_BANKING_OPERATION_READ_ONLY`
+- `PORT_BANKING_OPERATION_READ_ONLY`
+- `SCHEMA_BANKING_OPERATION_READ_ONLY`

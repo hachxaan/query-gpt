@@ -58,9 +58,13 @@ Combinaciones más frecuentes:
 
 Total de registros en la vista: 62,275
 
+**Nota:** Los conteos reales pueden variar ligeramente respecto a los de la vista SQL pura, porque el post-procesamiento de cardholder en Python puede reasignar tags Prepaid↔Payroll a nivel de usuario individual.
+
 ## Notas para futuras adiciones
 
 - Si necesitas un campo nuevo de `users` o `companies`, asegúrate de que esté expuesto en el CTE `users_filter` o `companies_filter` respectivamente.
 - Si necesitas una tabla nueva (ej: `users_features`), agrégala como LEFT JOIN en el CTE relevante.
 - Si el tag depende de una relación 1:N, resuélvelo en un CTE previo con agregación antes de usar en `tag_mailing_logic`.
 - El flag `_flags->>'has_cpayments_account'` se compara como string `= 'true'`, NO como `::boolean`, para evitar errores de runtime con datos inesperados en JSONB.
+- Si el tag depende de datos en `banking_operation` DB (como cardholder), agregar la lógica en `helpers/audiences.py`. Ver función `get_audiences_by_wl_and_services()` como ejemplo del patrón de post-procesamiento cross-database.
+- Los tags Prepaid/Payroll pueden ser swapped en Python si el usuario tiene cardholder. Ver constantes `PREPAID_TO_PAYROLL_TAGS` y `PAYROLL_TO_PREPAID_TAGS` en el helper.

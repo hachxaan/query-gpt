@@ -68,6 +68,15 @@
         <a href="{% url 'sms_home' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'sms_home' %}active{% else %}bg-light{% endif %}">
             <i class="fas fa-sms"></i> SMS
         </a>
+        <!-- Divider -->
+        <hr class="sidebar-divider">
+        <!-- Heading -->
+        <div class="sidebar-heading" style="color: rgba(255,255,255,0.4); padding: 0.75rem 1rem; font-size: 0.65rem; text-transform: uppercase;">
+            Catalogs
+        </div>
+        <a href="{% url 'exclusion_list' %}" class="list-group-item list-group-item-action {% if request.resolver_match.url_name == 'exclusion_list' %}active{% else %}bg-light{% endif %}">
+            <i class="fas fa-ban"></i> Mailing Exclusion
+        </a>
     </div>
 </div>
 <!-- /#sidebar-wrapper -->

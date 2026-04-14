@@ -1,0 +1,311 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Companies Mailing Exclusion{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap4.min.css">
+<style>
+    .exclusion-container { padding: 2rem; max-width: 100%; }
+    .page-title {
+        font-size: 2rem; margin-bottom: 2rem; font-weight: 700;
+        text-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    }
+    .card { border-radius: 0.5rem; }
+    .card-header h6 { color: white; }
+    .table { color: white; }
+    .table thead th { border-bottom-color: rgba(255,255,255,0.2); }
+    .table td, .table th { border-top-color: rgba(255,255,255,0.2); }
+    .form-control, .form-control-file {
+        background: rgba(255,255,255,0.15) !important;
+        border: 1px solid rgba(255,255,255,0.3);
+        color: white !important;
+    }
+    .form-control::placeholder { color: rgba(255,255,255,0.5); }
+    .form-control:focus {
+        background: rgba(255,255,255,0.2) !important;
+        border-color: rgba(255,255,255,0.5);
+        color: white !important;
+    }
+    label { color: rgba(255,255,255,0.9); }
+    #companyResults .list-group-item {
+        background: rgba(30,40,80,0.95) !important;
+        color: white !important;
+        border-color: rgba(255,255,255,0.2);
+    }
+    #companyResults .list-group-item:hover {
+        background: rgba(60,80,140,0.95) !important;
+    }
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter,
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_paginate {
+        color: rgba(255,255,255,0.8) !important;
+    }
+    .dataTables_wrapper .dataTables_filter input {
+        background: rgba(255,255,255,0.15) !important;
+        border: 1px solid rgba(255,255,255,0.3);
+        color: white !important;
+    }
+    .dataTables_wrapper .dataTables_length select {
+        background: rgba(255,255,255,0.15) !important;
+        border: 1px solid rgba(255,255,255,0.3);
+        color: white !important;
+    }
+    .page-item .page-link {
+        background: rgba(255,255,255,0.1);
+        border-color: rgba(255,255,255,0.2);
+        color: white;
+    }
+    .page-item.active .page-link {
+        background: rgba(255,255,255,0.3);
+        border-color: rgba(255,255,255,0.4);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex" id="wrapper">
+    <!-- Sidebar -->
+    {% include 'queries/menu-querys.html' %}
+
+    <!-- Page Content -->
+    <div id="page-content-wrapper">
+        <div class="container-fluid exclusion-container">
+            <h1 class="page-title">Companies Mailing Exclusion</h1>
+
+            <!-- Messages -->
+            {% if messages %}
+            <div class="mb-3">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="row">
+                <!-- Add Single -->
+                <div class="col-lg-4 mb-4">
+                    <div class="card shadow">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold">Add Company</h6>
+                        </div>
+                        <div class="card-body">
+                            <form method="post" action="{% url 'exclusion_add' %}">
+                                {% csrf_token %}
+                                <div class="form-group">
+                                    <label for="companySearch">Company</label>
+                                    <input type="text" class="form-control" id="companySearch"
+                                           placeholder="Search by name or ID..." autocomplete="off">
+                                    <input type="hidden" name="company_id" id="companyId">
+                                    <div id="companyResults" class="list-group mt-1"
+                                         style="position:absolute;z-index:1000;max-height:200px;overflow-y:auto;display:none;">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="reason">Reason</label>
+                                    <input type="text" class="form-control" name="reason" id="reason"
+                                           maxlength="120" placeholder="Optional reason...">
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-block" id="btnAdd" disabled>
+                                    <i class="fas fa-plus"></i> Add
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Bulk Add CSV -->
+                    <div class="card shadow mt-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-success">Bulk Add (CSV)</h6>
+                        </div>
+                        <div class="card-body">
+                            <form method="post" action="{% url 'exclusion_bulk_add' %}" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <div class="form-group">
+                                    <label>CSV file <small class="text-muted">(company_id, reason)</small></label>
+                                    <input type="file" class="form-control-file" name="csv_file" accept=".csv" required>
+                                </div>
+                                <button type="submit" class="btn btn-success btn-block"
+                                        onclick="return confirm('Upload and add exclusions from CSV?')">
+                                    <i class="fas fa-upload"></i> Upload CSV
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="col-lg-8">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                            <h6 class="m-0 font-weight-bold">
+                                Exclusion List
+                                <span class="badge badge-secondary">{{ exclusions|length }}</span>
+                            </h6>
+                            <form method="post" action="{% url 'exclusion_bulk_delete' %}" id="bulkDeleteForm">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm" id="btnBulkDelete" disabled
+                                        onclick="return confirm('Delete selected exclusions?')">
+                                    <i class="fas fa-trash"></i> Delete Selected (<span id="selectedCount">0</span>)
+                                </button>
+                            </form>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th width="30"><input type="checkbox" id="selectAll"></th>
+                                            <th>ID</th>
+                                            <th>Company ID</th>
+                                            <th>Company Name</th>
+                                            <th>Reason</th>
+                                            <th width="140">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for exc in exclusions %}
+                                        <tr>
+                                            <td>
+                                                <input type="checkbox" class="row-select" value="{{ exc.id }}"
+                                                       name="selected_ids" form="bulkDeleteForm">
+                                            </td>
+                                            <td>{{ exc.id }}</td>
+                                            <td>{{ exc.company_id }}</td>
+                                            <td>{{ exc.company_name|default:"-" }}</td>
+                                            <td>
+                                                <span class="reason-display-{{ exc.id }}">{{ exc.reason|default:"-" }}</span>
+                                                <form method="post" action="{% url 'exclusion_update' exc.id %}"
+                                                      class="form-inline reason-edit-{{ exc.id }}" style="display:none;">
+                                                    {% csrf_token %}
+                                                    <input type="text" name="reason" class="form-control form-control-sm"
+                                                           value="{{ exc.reason|default_if_none:'' }}" maxlength="120" style="width:200px;">
+                                                    <button type="submit" class="btn btn-sm btn-success ml-1"><i class="fas fa-check"></i></button>
+                                                    <button type="button" class="btn btn-sm btn-secondary ml-1 btn-cancel-edit"
+                                                            data-id="{{ exc.id }}"><i class="fas fa-times"></i></button>
+                                                </form>
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary btn-edit" data-id="{{ exc.id }}"
+                                                        title="Edit reason"><i class="fas fa-edit"></i></button>
+                                                <form method="post" action="{% url 'exclusion_delete' exc.id %}" class="d-inline">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                            onclick="return confirm('Remove this exclusion?')" title="Delete">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="6" class="text-center text-muted">No exclusions found.</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap4.min.js"></script>
+<script>
+$(document).ready(function() {
+    // DataTable
+    var table = $('#dataTable').DataTable({
+        "order": [[3, "asc"]],
+        "pageLength": 25,
+        "language": {
+            "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json"
+        },
+        "columnDefs": [
+            { "orderable": false, "targets": [0, 5] }
+        ]
+    });
+
+    // Select All
+    $('#selectAll').on('change', function() {
+        var checked = this.checked;
+        $('.row-select').each(function() { this.checked = checked; });
+        updateBulkDeleteBtn();
+    });
+
+    $(document).on('change', '.row-select', function() {
+        updateBulkDeleteBtn();
+    });
+
+    function updateBulkDeleteBtn() {
+        var count = $('.row-select:checked').length;
+        $('#selectedCount').text(count);
+        $('#btnBulkDelete').prop('disabled', count === 0);
+    }
+
+    // Inline edit
+    $(document).on('click', '.btn-edit', function() {
+        var id = $(this).data('id');
+        $('.reason-display-' + id).hide();
+        $('.reason-edit-' + id).show();
+    });
+    $(document).on('click', '.btn-cancel-edit', function() {
+        var id = $(this).data('id');
+        $('.reason-display-' + id).show();
+        $('.reason-edit-' + id).hide();
+    });
+
+    // Company autocomplete search
+    var searchTimer;
+    $('#companySearch').on('input', function() {
+        clearTimeout(searchTimer);
+        var term = $(this).val().trim();
+        if (term.length < 2) {
+            $('#companyResults').hide();
+            return;
+        }
+        searchTimer = setTimeout(function() {
+            $.getJSON("{% url 'company_search_api' %}", {term: term}, function(data) {
+                var $results = $('#companyResults').empty();
+                if (data.length === 0) {
+                    $results.append('<div class="list-group-item text-muted">No companies found</div>');
+                } else {
+                    data.forEach(function(c) {
+                        $results.append(
+                            '<a href="#" class="list-group-item list-group-item-action company-option" ' +
+                            'data-id="' + c.id + '">' + c.id + ' - ' + c.name + '</a>'
+                        );
+                    });
+                }
+                $results.show();
+            });
+        }, 300);
+    });
+
+    $(document).on('click', '.company-option', function(e) {
+        e.preventDefault();
+        var id = $(this).data('id');
+        var text = $(this).text();
+        $('#companySearch').val(text);
+        $('#companyId').val(id);
+        $('#companyResults').hide();
+        $('#btnAdd').prop('disabled', false);
+    });
+
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('#companySearch, #companyResults').length) {
+            $('#companyResults').hide();
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -9,6 +9,7 @@ from query_builder_app.views.mailing_audiencias.views import GenerateAndDownload
 from query_builder_app.views.query_list import  query_list, query_create, query_update, query_delete, get_query_from_gpt
 from query_builder_app.views.query_list_download import query_list_download, download_results
 from query_builder_app.views.sms.views import sms_home, sms_send_single, sms_send_bulk
+from query_builder_app.views import catalogs
 from django.views.generic import TemplateView
 
 urlpatterns = [
@@ -38,6 +39,15 @@ urlpatterns = [
     path('sms/', sms_home, name='sms_home'),
     path('sms/send/', sms_send_single, name='sms_send_single'),
     path('sms/send-bulk/', sms_send_bulk, name='sms_send_bulk'),
+
+    # Catalogs - Companies Mailing Exclusion
+    path('catalogs/exclusions/', catalogs.exclusion_list, name='exclusion_list'),
+    path('catalogs/exclusions/add/', catalogs.exclusion_add, name='exclusion_add'),
+    path('catalogs/exclusions/update/<int:pk>/', catalogs.exclusion_update, name='exclusion_update'),
+    path('catalogs/exclusions/delete/<int:pk>/', catalogs.exclusion_delete, name='exclusion_delete'),
+    path('catalogs/exclusions/bulk-delete/', catalogs.exclusion_bulk_delete, name='exclusion_bulk_delete'),
+    path('catalogs/exclusions/bulk-add/', catalogs.exclusion_bulk_add, name='exclusion_bulk_add'),
+    path('catalogs/companies/search/', catalogs.company_search_api, name='company_search_api'),
 ]
 
 
